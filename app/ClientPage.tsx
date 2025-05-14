@@ -105,10 +105,10 @@ export default function ClientPage() {
                 </StaggerItem>
                 <StaggerItem>
                   <ServiceCard
-                    title="Antar Jemput"
-                    description="Layanan antar jemput bandara, stasiun, dan terminal dengan armada yang nyaman dan tepat waktu"
-                    icon="Plane"
-                    link="/services"
+                    title="Paket Komplit"
+                    description="Mobil, supir, BBM, dan tol sudah termasuk. Praktis dan hemat untuk wisata atau bisnis."
+                    icon="Car"
+                    link="/tour-packages?paket-komplit=true"
                   />
                 </StaggerItem>
               </div>

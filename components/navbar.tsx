@@ -14,7 +14,8 @@ const navLinks = [
   { name: "Rental Mobil", href: "/cars" },
   { name: "Paket Wisata", href: "/tour-packages" },
   { name: "Tentang Kami", href: "/about" },
-  { name: "Kontak", href: "/contact" },
+  { name: "Syarat & Ketentuan", href: "/terms" },
+  // { name: "Kontak", href: "/contact" },
 ]
 
 export default function Navbar() {
@@ -134,7 +135,7 @@ export default function Navbar() {
                     : "bg-red-600 hover:bg-red-700 text-white",
                 )}
               >
-                <Link href="tel:087817090619" className="flex items-center">
+                <Link href="/contact" className="flex items-center">
                   <Phone className="mr-2 h-4 w-4" />
                   Hubungi Kami
                 </Link>
@@ -153,13 +154,6 @@ export default function Navbar() {
             <SheetContent
               side="right"
               className="w-[85vw] sm:w-[350px] p-0"
-              // Add custom motion animations to prevent conflicts
-              motionProps={{
-                initial: { x: "100%" },
-                animate: { x: "0%" },
-                exit: { x: "100%" },
-                transition: { type: "spring", stiffness: 300, damping: 30 },
-              }}
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b">

@@ -2,12 +2,12 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import "./globals.css"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import ScrollToTop from "@/components/scroll-to-top"
 import { FilterProvider } from "@/contexts/filter-context"
+import { AuthProvider } from "@/contexts/auth-context"
+import LayoutWrapper from "@/components/layout-wrapper"
+import FloatingWhatsAppButton from "@/components/floating-whatsapp-button"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     google: "verification_token",
   },
   category: "transportation",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -89,15 +89,15 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={`${poppins.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-          <FilterProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
+          <AuthProvider>
+            <FilterProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+              <FloatingWhatsAppButton />
               <Toaster />
-              <ScrollToTop />
-            </div>
-          </FilterProvider>
+            </FilterProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
