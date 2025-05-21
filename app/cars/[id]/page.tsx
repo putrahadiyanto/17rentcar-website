@@ -83,19 +83,6 @@ export default function CarDetailPage() {
                 priority
               />
             </motion.div>
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-              <div className="flex items-center">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${i < car.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-                    />
-                  ))}
-                </div>
-                <span className="ml-2 text-white text-sm">{car.reviewCount} ulasan</span>
-              </div>
-            </div>
           </motion.div>
 
           <motion.div
@@ -154,10 +141,9 @@ export default function CarDetailPage() {
 
         <AnimatedSection className="mt-16" delay={0.3}>
           <Tabs defaultValue="specs">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="specs">Spesifikasi</TabsTrigger>
               <TabsTrigger value="terms">Syarat & Ketentuan</TabsTrigger>
-              <TabsTrigger value="reviews">Ulasan</TabsTrigger>
             </TabsList>
             <TabsContent value="specs" className="mt-6">
               <div className="bg-white p-6 rounded-lg border shadow-sm">
@@ -236,44 +222,6 @@ export default function CarDetailPage() {
                     </motion.li>
                   ))}
                 </ul>
-              </div>
-            </TabsContent>
-            <TabsContent value="reviews" className="mt-6">
-              <div className="bg-white p-6 rounded-lg border shadow-sm">
-                <h3 className="text-xl font-semibold mb-4 flex items-center">
-                  <span className="w-1 h-6 bg-red-600 rounded-full mr-2"></span>
-                  Ulasan Pelanggan
-                </h3>
-                <div className="space-y-6">
-                  {car.reviews.map((review, index) => (
-                    <motion.div
-                      key={index}
-                      className="p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-all hover:shadow-sm"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -5 }}
-                    >
-                      <div className="flex items-center mb-2">
-                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3 text-red-600 font-bold">
-                          {review.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="font-medium">{review.name}</h4>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-gray-600 pl-13">{review.comment}</p>
-                    </motion.div>
-                  ))}
-                </div>
               </div>
             </TabsContent>
           </Tabs>

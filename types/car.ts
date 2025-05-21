@@ -13,11 +13,4 @@ export interface CarType {
   shortDescription: string
   description: string
   features: string[]
-  rating: number
-  reviewCount: number
-  reviews: {
-    name: string
-    rating: number
-    comment: string
-  }[]
 }

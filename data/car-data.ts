@@ -17,25 +17,6 @@ export const carData: CarType[] = [
     description:
       "Toyota Avanza adalah mobil MPV yang nyaman dan ekonomis, cocok untuk perjalanan keluarga atau rombongan kecil. Dengan kapasitas 7 penumpang, ruang kabin yang lega, dan konsumsi bahan bakar yang efisien, Avanza menjadi pilihan tepat untuk perjalanan dalam kota maupun luar kota.",
     features: ["AC Double Blower", "Audio System", "Power Window", "Power Steering", "Kursi Lipat", "Bagasi Luas"],
-    rating: 4,
-    reviewCount: 120,
-    reviews: [
-      {
-        name: "Budi Santoso",
-        rating: 5,
-        comment: "Mobil nyaman, bersih dan terawat. Driver juga ramah dan mengenal rute dengan baik.",
-      },
-      {
-        name: "Siti Rahayu",
-        rating: 4,
-        comment: "Perjalanan lancar, AC dingin dan mobil dalam kondisi baik. Recommended!",
-      },
-      {
-        name: "Ahmad Hidayat",
-        rating: 4,
-        comment: "Pelayanan memuaskan, mobil bersih dan nyaman untuk perjalanan keluarga.",
-      },
-    ],
   },
   {
     id: "innova",
@@ -60,25 +41,6 @@ export const carData: CarType[] = [
       "Kursi Captain Seat",
       "Airbag",
     ],
-    rating: 5,
-    reviewCount: 85,
-    reviews: [
-      {
-        name: "Dian Permata",
-        rating: 5,
-        comment: "Mobil sangat nyaman, cocok untuk perjalanan jauh. AC dingin dan interior bersih.",
-      },
-      {
-        name: "Rudi Hartono",
-        rating: 5,
-        comment: "Pelayanan prima, mobil dalam kondisi prima. Sangat memuaskan!",
-      },
-      {
-        name: "Dewi Lestari",
-        rating: 5,
-        comment: "Innova adalah pilihan tepat untuk keluarga besar. Nyaman dan bertenaga.",
-      },
-    ],
   },
   {
     id: "hiace",
@@ -96,26 +58,7 @@ export const carData: CarType[] = [
     description:
       "Toyota Hiace adalah minibus dengan kapasitas besar yang ideal untuk rombongan atau grup wisata. Dengan kapasitas hingga 14 penumpang, Hiace menawarkan ruang yang lega dan nyaman untuk perjalanan jarak jauh. Dilengkapi dengan AC yang dingin dan kursi yang empuk, Hiace menjamin kenyamanan selama perjalanan.",
     features: ["AC Central", "Audio System", "Kursi Reclining", "Bagasi Luas", "Power Window", "Power Steering"],
-    rating: 4,
-    reviewCount: 45,
-    reviews: [
-      {
-        name: "Hendra Wijaya",
-        rating: 4,
-        comment: "Sangat cocok untuk rombongan besar, AC dingin dan nyaman untuk perjalanan jauh.",
-      },
-      {
-        name: "Rina Susanti",
-        rating: 5,
-        comment: "Kami sewa untuk acara kantor, semua puas dengan kenyamanannya.",
-      },
-      {
-        name: "Bambang Suryanto",
-        rating: 4,
-        comment: "Mobil bersih dan terawat, driver juga profesional.",
-      },
-    ],
-  },
+  },  
   {
     id: "fortuner",
     name: "Toyota Fortuner",
@@ -132,25 +75,6 @@ export const carData: CarType[] = [
     description:
       "Toyota Fortuner adalah SUV premium yang menggabungkan performa tangguh dan tampilan mewah. Dengan ground clearance tinggi dan sistem 4x4, Fortuner mampu melalui berbagai medan dengan mudah. Interior yang luas dan mewah dengan fitur keselamatan lengkap menjadikannya pilihan tepat untuk perjalanan keluarga maupun bisnis.",
     features: ["AC Dual Zone", "Audio System Touchscreen", "Power Window", "Power Steering", "Leather Seat", "Airbag"],
-    rating: 5,
-    reviewCount: 60,
-    reviews: [
-      {
-        name: "Irfan Hakim",
-        rating: 5,
-        comment: "Mobil mewah dengan performa luar biasa. Sangat nyaman untuk perjalanan jauh.",
-      },
-      {
-        name: "Lina Wijaya",
-        rating: 5,
-        comment: "Fortuner adalah pilihan tepat untuk kesan premium. Puas dengan layanannya.",
-      },
-      {
-        name: "Budi Santoso",
-        rating: 4,
-        comment: "Mobil dalam kondisi prima, nyaman dan bertenaga. Recommended!",
-      },
-    ],
   },
   {
     id: "alphard",
@@ -168,25 +92,6 @@ export const carData: CarType[] = [
     description:
       "Toyota Alphard adalah MPV mewah yang menawarkan kenyamanan setara kelas premium. Dengan interior yang luas dan mewah, kursi captain seat yang nyaman, serta berbagai fitur hiburan dan keselamatan canggih, Alphard memberikan pengalaman berkendara yang luar biasa. Cocok untuk perjalanan bisnis, keluarga, atau acara spesial.",
     features: ["AC Triple Zone", "Audio System Premium", "Power Door", "Captain Seat", "Leather Seat", "Sunroof"],
-    rating: 5,
-    reviewCount: 40,
-    reviews: [
-      {
-        name: "Agus Salim",
-        rating: 5,
-        comment: "Mobil super mewah dan nyaman. Cocok untuk acara spesial dan perjalanan bisnis.",
-      },
-      {
-        name: "Diana Putri",
-        rating: 5,
-        comment: "Pengalaman berkendara yang luar biasa. Interior mewah dan sangat nyaman.",
-      },
-      {
-        name: "Hendri Tanuwijaya",
-        rating: 5,
-        comment: "Layanan prima dengan mobil kelas premium. Sangat memuaskan!",
-      },
-    ],
   },
   {
     id: "xpander",
@@ -211,25 +116,6 @@ export const carData: CarType[] = [
       "Kursi Lipat",
       "Bagasi Luas",
     ],
-    rating: 4,
-    reviewCount: 75,
-    reviews: [
-      {
-        name: "Rini Susanti",
-        rating: 4,
-        comment: "Mobil nyaman dengan desain modern. Cocok untuk keluarga muda.",
-      },
-      {
-        name: "Andi Pratama",
-        rating: 5,
-        comment: "Perjalanan lancar dengan Xpander. AC dingin dan interior lega.",
-      },
-      {
-        name: "Siti Nurhaliza",
-        rating: 4,
-        comment: "Mobil dalam kondisi baik dan bersih. Pelayanan juga memuaskan.",
-      },
-    ],
   },
   {
     id: "pajero",
@@ -247,25 +133,6 @@ export const carData: CarType[] = [
     description:
       "Mitsubishi Pajero Sport adalah SUV tangguh dengan performa dan kenyamanan premium. Dengan mesin diesel bertenaga dan sistem 4x4 yang handal, Pajero Sport mampu melalui berbagai medan dengan mudah. Interior yang luas dan mewah dengan berbagai fitur canggih menjadikannya pilihan tepat untuk petualangan keluarga.",
     features: ["AC Dual Zone", "Audio System Touchscreen", "Power Window", "Power Steering", "Leather Seat", "Airbag"],
-    rating: 5,
-    reviewCount: 55,
-    reviews: [
-      {
-        name: "Dedi Cahyadi",
-        rating: 5,
-        comment: "SUV tangguh dengan kenyamanan premium. Sangat puas dengan layanannya.",
-      },
-      {
-        name: "Rina Marlina",
-        rating: 4,
-        comment: "Mobil dalam kondisi prima, nyaman untuk perjalanan jauh.",
-      },
-      {
-        name: "Budi Hartono",
-        rating: 5,
-        comment: "Pengalaman berkendara yang luar biasa dengan Pajero Sport.",
-      },
-    ],
   },
   {
     id: "brv",
@@ -290,25 +157,6 @@ export const carData: CarType[] = [
       "Kursi Lipat",
       "Bagasi Luas",
     ],
-    rating: 4,
-    reviewCount: 65,
-    reviews: [
-      {
-        name: "Dian Sastro",
-        rating: 4,
-        comment: "Mobil nyaman dengan desain modern. Cocok untuk keluarga kecil.",
-      },
-      {
-        name: "Rudi Hermawan",
-        rating: 5,
-        comment: "Perjalanan lancar dengan BR-V. AC dingin dan interior lega.",
-      },
-      {
-        name: "Sinta Dewi",
-        rating: 4,
-        comment: "Mobil dalam kondisi baik dan bersih. Pelayanan juga memuaskan.",
-      },
-    ],
   },
   {
     id: "crv",
@@ -326,24 +174,5 @@ export const carData: CarType[] = [
     description:
       "Honda CR-V adalah SUV premium yang menawarkan kenyamanan dan teknologi canggih. Dengan desain elegan dan interior yang luas, CR-V memberikan pengalaman berkendara yang nyaman dan mewah. Dilengkapi dengan berbagai fitur keselamatan dan hiburan terkini, CR-V menjadi pilihan tepat untuk keluarga modern.",
     features: ["AC Dual Zone", "Audio System Touchscreen", "Power Window", "Power Steering", "Leather Seat", "Airbag"],
-    rating: 5,
-    reviewCount: 50,
-    reviews: [
-      {
-        name: "Andi Wijaya",
-        rating: 5,
-        comment: "SUV premium dengan kenyamanan luar biasa. Sangat puas dengan layanannya.",
-      },
-      {
-        name: "Rina Susanti",
-        rating: 4,
-        comment: "Mobil dalam kondisi prima, nyaman untuk perjalanan jauh.",
-      },
-      {
-        name: "Budi Santoso",
-        rating: 5,
-        comment: "Pengalaman berkendara yang luar biasa dengan CR-V.",
-      },
-    ],
   },
 ]

@@ -106,11 +106,11 @@ export default function CarsPage() {
               filters.capacity ||
               filters.priceRange[0] !== minPrice ||
               filters.priceRange[1] !== maxPrice) && (
-              <Button variant="outline" size="sm" onClick={resetFilters} className="flex items-center gap-1">
-                <X className="h-4 w-4" />
-                Reset Filter
-              </Button>
-            )}
+                <Button variant="outline" size="sm" onClick={resetFilters} className="flex items-center gap-1">
+                  <X className="h-4 w-4" />
+                  Reset Filter
+                </Button>
+              )}
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <Label htmlFor="sort" className="text-sm whitespace-nowrap hidden md:inline">
@@ -119,7 +119,6 @@ export default function CarsPage() {
             <Select
               value={sortOption}
               onValueChange={(value) => setSortOption(value as any)}
-              className="w-full md:w-auto"
             >
               <SelectTrigger id="sort" className="w-full md:w-[180px]">
                 <SelectValue placeholder="Urutkan berdasarkan" />
