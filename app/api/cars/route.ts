@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 // This API route will fetch cars from your Laravel backend
 export async function GET(request: NextRequest) {
     try {
-        // Get the Laravel API URL from environment variables or use the default
-        const LARAVEL_API_URL = process.env.LARAVEL_API_URL || 'http://backend-17rentcar.test/api/cars';
+        // Get the base Laravel API URL from environment variables and append /cars
+        const baseApiUrl = process.env.LARAVEL_API_URL || 'http://backend-17rentcar.test/api';
+        const LARAVEL_API_URL = `${baseApiUrl}/cars`;
 
         // Make a request to your Laravel API
         const response = await fetch(LARAVEL_API_URL, {
