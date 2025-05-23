@@ -14,6 +14,7 @@ import { motion } from "framer-motion"
 import { SlidersHorizontal, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import PageTransition from "@/components/page-transition"
+import ApiError from "@/components/api-error"
 
 export default function CarsPage() {
   const {
@@ -27,6 +28,9 @@ export default function CarsPage() {
     availableTypes,
     minPrice,
     maxPrice,
+    loading,
+    error,
+    retry
   } = useFilter()
 
   const [priceRange, setPriceRange] = useState<[number, number]>(filters.priceRange)
@@ -97,8 +101,10 @@ export default function CarsPage() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
-            <p className="text-sm text-gray-500">Menampilkan {filteredCars.length} mobil</p>
-            {(filters.search ||
+            <p className="text-sm text-gray-500">
+              {loading ? 'Memuat data mobil...' : `Menampilkan ${filteredCars.length} mobil`}
+            </p>
+            {!loading && (filters.search ||
               filters.types.length > 0 ||
               filters.brands.length > 0 ||
               filters.transmission ||
@@ -429,34 +435,43 @@ export default function CarsPage() {
           </div>
 
           <div className="lg:col-span-3">
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
-                <TabsTrigger value="all" onClick={() => setFilters({ types: [] })}>
-                  Semua
-                </TabsTrigger>
-                <TabsTrigger value="mpv" onClick={() => setFilters({ types: ["MPV"] })}>
-                  MPV
-                </TabsTrigger>
-                <TabsTrigger value="suv" onClick={() => setFilters({ types: ["SUV"] })}>
-                  SUV
-                </TabsTrigger>
-                <TabsTrigger value="minibus" onClick={() => setFilters({ types: ["Minibus"] })}>
-                  Minibus
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="all">
-                <CarList cars={filteredCars} />
-              </TabsContent>
-              <TabsContent value="mpv">
-                <CarList cars={filteredCars.filter((car) => car.type === "MPV")} />
-              </TabsContent>
-              <TabsContent value="suv">
-                <CarList cars={filteredCars.filter((car) => car.type === "SUV")} />
-              </TabsContent>
-              <TabsContent value="minibus">
-                <CarList cars={filteredCars.filter((car) => car.type === "Minibus")} />
-              </TabsContent>
-            </Tabs>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
+                <p className="text-gray-500">Memuat data mobil...</p>
+              </div>
+            ) : error ? (
+              <ApiError message={error} onRetry={retry} />
+            ) : (
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 mb-8">
+                  <TabsTrigger value="all" onClick={() => setFilters({ types: [] })}>
+                    Semua
+                  </TabsTrigger>
+                  <TabsTrigger value="mpv" onClick={() => setFilters({ types: ["MPV"] })}>
+                    MPV
+                  </TabsTrigger>
+                  <TabsTrigger value="suv" onClick={() => setFilters({ types: ["SUV"] })}>
+                    SUV
+                  </TabsTrigger>
+                  <TabsTrigger value="minibus" onClick={() => setFilters({ types: ["Minibus"] })}>
+                    Minibus
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="all">
+                  <CarList cars={filteredCars} />
+                </TabsContent>
+                <TabsContent value="mpv">
+                  <CarList cars={filteredCars.filter((car) => car.type === "MPV")} />
+                </TabsContent>
+                <TabsContent value="suv">
+                  <CarList cars={filteredCars.filter((car) => car.type === "SUV")} />
+                </TabsContent>
+                <TabsContent value="minibus">
+                  <CarList cars={filteredCars.filter((car) => car.type === "Minibus")} />
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </div>
       </div>

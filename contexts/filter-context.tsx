@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { CarType } from "@/types/car"
-import { carData } from "@/data/car-data"
+import { fetchCars } from "@/lib/api-services"
 
 type CarFilters = {
   search: string
@@ -27,6 +27,9 @@ type FilterContextType = {
   availableTypes: string[]
   minPrice: number
   maxPrice: number
+  loading: boolean
+  error: string | null
+  retry: () => void
 }
 
 const initialFilters: CarFilters = {
@@ -42,15 +45,76 @@ const initialFilters: CarFilters = {
 const FilterContext = createContext<FilterContextType | undefined>(undefined)
 
 export function FilterProvider({ children }: { children: ReactNode }) {
+  const [cars, setCars] = useState<CarType[]>([])
   const [filters, setFiltersState] = useState<CarFilters>(initialFilters)
   const [sortOption, setSortOption] = useState<SortOption>("price-asc")
-  const [filteredCars, setFilteredCars] = useState<CarType[]>(carData)
+  const [filteredCars, setFilteredCars] = useState<CarType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  // Function to fetch cars data
+  const fetchCarsData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await fetchCars()
+      if (data.length === 0) {
+        setError("Tidak ada data mobil yang ditemukan. Silakan coba lagi nanti.")
+      } else {
+        setCars(data)
+        setFilteredCars(data)
+      }
+    } catch (err) {
+      console.error("Failed to fetch cars:", err)
+      setError("Gagal memuat data dari server. Silakan periksa koneksi Anda dan coba lagi.")
+
+      // Import mock data as fallback when in development mode
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const { carData } = await import('@/data/car-data')
+          console.log('Using fallback mock data')
+          setCars(carData)
+          setFilteredCars(carData)
+          setError(null)
+        } catch (mockErr) {
+          console.error("Failed to load fallback data:", mockErr)
+        }
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Function to retry loading data
+  const retry = () => {
+    fetchCarsData()
+  }
+
+  // Fetch cars from API on component mount
+  useEffect(() => {
+    fetchCarsData()
+  }, [])
 
   // Calculate available filter options and price range
-  const availableBrands = Array.from(new Set(carData.map((car) => car.brand)))
-  const availableTypes = Array.from(new Set(carData.map((car) => car.type)))
-  const minPrice = Math.min(...carData.map((car) => car.price))
-  const maxPrice = Math.max(...carData.map((car) => car.price))
+  const availableBrands = Array.from(new Set(cars.map((car) => car.brand)))
+  const availableTypes = Array.from(new Set(cars.map((car) => car.type)))
+  const minPrice = cars.length > 0 ? Math.min(...cars.map((car) => car.price)) : 200000
+  const maxPrice = cars.length > 0 ? Math.max(...cars.map((car) => car.price)) : 2000000
+
+  // Update filters when price range changes based on available cars
+  useEffect(() => {
+    if (cars.length > 0) {
+      const min = Math.min(...cars.map((car) => car.price))
+      const max = Math.max(...cars.map((car) => car.price))
+
+      // Only update if different from current price range
+      if (min !== filters.priceRange[0] || max !== filters.priceRange[1]) {
+        setFiltersState((prev) => ({
+          ...prev,
+          priceRange: [min, max],
+        }))
+      }
+    }
+  }, [cars])
 
   // Update filters
   const setFilters = (newFilters: Partial<CarFilters>) => {
@@ -59,12 +123,17 @@ export function FilterProvider({ children }: { children: ReactNode }) {
 
   // Reset filters
   const resetFilters = () => {
-    setFiltersState(initialFilters)
+    setFiltersState({
+      ...initialFilters,
+      priceRange: [minPrice, maxPrice],
+    })
   }
 
   // Apply filters and sorting
   useEffect(() => {
-    let result = [...carData]
+    if (cars.length === 0) return
+
+    let result = [...cars]
 
     // Apply search filter
     if (filters.search) {
@@ -120,12 +189,12 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         result.sort((a, b) => b.name.localeCompare(a.name))
         break
       case "rating-desc":
-        result.sort((a, b) => b.rating - a.rating)
+        // Add rating if your API supports it
         break
     }
 
     setFilteredCars(result)
-  }, [filters, sortOption])
+  }, [filters, sortOption, cars])
 
   return (
     <FilterContext.Provider
@@ -140,6 +209,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         availableTypes,
         minPrice,
         maxPrice,
+        loading,
+        error,
+        retry,
       }}
     >
       {children}
