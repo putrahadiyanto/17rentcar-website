@@ -54,12 +54,16 @@ export async function fetchCarById(id: string): Promise<CarType | null> {
                 return null;
             }
             throw new Error(`Error fetching car: ${response.status}`);
+        } const result = await response.json();
+
+        // Check for different response formats and extract car data properly
+        const carData = result.data || result || null;
+
+        if (carData && typeof carData === 'object') {
+            return carData as CarType;
         }
 
-        const result = await response.json();
-
-        // If your API returns data in a nested format
-        return result.data || null;
+        return null;
     } catch (error) {
         console.error(`Failed to fetch car with ID ${id}:`, error);
         throw error;

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { carData } from "@/data/car-data"
+import { type CarType } from "@/types/car"
 import Image from "next/image"
 import { notFound, useParams } from "next/navigation"
 import { Check, Star } from "lucide-react"
@@ -14,28 +14,51 @@ import AnimatedSection from "@/components/animated-section"
 import PageLoading from "@/components/page-loading"
 import { CarStructuredData } from "@/components/structured-data"
 import Head from "next/head"
+import { fetchCarById } from "@/lib/api-services"
+import ApiError from "@/components/api-error"
 
 export default function CarDetailPage() {
   const params = useParams()
-  const [car, setCar] = useState<(typeof carData)[0] | null>(null)
+  const [car, setCar] = useState<CarType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-
+  const [error, setError] = useState<string | null>(null)
   useEffect(() => {
-    // Simulate loading
-    setIsLoading(true)
-    setTimeout(() => {
-      const foundCar = carData.find((car) => car.id === params.id)
-      setCar(foundCar || null)
-      setIsLoading(false)
-    }, 500)
-  }, [params.id])
+    const loadCar = async () => {
+      setIsLoading(true)
+      setError(null)
 
+      try {
+        const carId = params.id as string
+        const carData = await fetchCarById(carId)
+
+        if (carData) {
+          // Ensure car data has all required properties or provide defaults
+          const processedCar = {
+            ...carData,
+            features: carData.features || [],
+            description: carData.description || 'Tidak ada deskripsi tersedia',
+            shortDescription: carData.shortDescription || ''
+          };
+          setCar(processedCar)
+        } else {
+          setError('Mobil tidak ditemukan')
+        }
+      } catch (err) {
+        console.error('Failed to fetch car:', err)
+        setError('Gagal memuat data mobil. Silakan periksa koneksi Anda dan coba lagi.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCar()
+  }, [params.id])
   if (isLoading) {
     return <PageLoading />
   }
 
-  if (!car) {
-    notFound()
+  if (error || !car) {
+    return <ApiError message={error || 'Mobil tidak ditemukan'} onRetry={() => window.location.reload()} />
   }
 
   return (
@@ -74,14 +97,13 @@ export default function CarDetailPage() {
             transition={{ duration: 0.5 }}
             className="relative h-[400px] rounded-lg overflow-hidden shadow-lg"
           >
-            <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.5 }} className="h-full w-full">
-              <Image
-                src={car.image || "/placeholder.svg"}
-                alt={`Rental Mobil ${car.name} di Bandung - 17Rentcar`}
-                fill
-                className="object-cover"
-                priority
-              />
+            <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.5 }} className="h-full w-full">              <Image
+              src={car.image || "/placeholder.svg"}
+              alt={`Rental Mobil ${car.name} di Bandung - 17Rentcar`}
+              fill
+              className="object-cover"
+              priority
+            />
             </motion.div>
           </motion.div>
 
@@ -104,13 +126,12 @@ export default function CarDetailPage() {
               <p className="text-gray-600">Harga sudah termasuk driver dan BBM (dalam kota)</p>
             </div>
 
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <span className="w-1 h-6 bg-red-600 rounded-full mr-2"></span>
-                Fitur Utama
-              </h3>
+            <div className="mb-8">              <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <span className="w-1 h-6 bg-red-600 rounded-full mr-2"></span>
+              Fitur Utama
+            </h3>
               <div className="grid grid-cols-2 gap-y-3">
-                {car.features.map((feature, index) => (
+                {car.features && Array.isArray(car.features) ? car.features.map((feature, index) => (
                   <motion.div
                     key={index}
                     className="flex items-center"
@@ -123,7 +144,9 @@ export default function CarDetailPage() {
                     </div>
                     <span>{feature}</span>
                   </motion.div>
-                ))}
+                )) : (
+                  <div className="col-span-2 text-gray-500">Fitur tidak tersedia</div>
+                )}
               </div>
             </div>
 
