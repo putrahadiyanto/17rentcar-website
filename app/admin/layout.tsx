@@ -15,17 +15,37 @@ export default function AdminLayout({
 }
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
+    const isLoginPage = typeof window !== 'undefined' && window.location.pathname === '/admin/login';
 
     // This is a client-side authentication check
-    // The middleware will handle server-side auth validation
     React.useEffect(() => {
-        if (!isAuthenticated && window.location.pathname !== '/admin/login') {
+        // Only redirect if not on login page and auth check is complete (not loading)
+        if (!isAuthenticated && !isLoading && !isLoginPage) {
+            console.log('AdminLayout: Not authenticated, redirecting to login');
             router.push('/admin/login');
         }
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, isLoading, router, isLoginPage]);
 
+    // Show loading state while checking auth
+    if (isLoading && !isLoginPage) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-primary"></div>
+                    <p className="mt-4 text-gray-600">Checking authentication...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Prevent rendering children if not authenticated and not on login page
+    if (!isAuthenticated && !isLoading && !isLoginPage) {
+        return null; // Don't render anything while redirecting
+    }
+
+    // Allow rendering children if authenticated or on login page
     return (
         <div className="min-h-screen bg-gray-100">
             {children}

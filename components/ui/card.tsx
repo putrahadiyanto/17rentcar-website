@@ -27,15 +27,9 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<t
 
 const Card = forwardRef<HTMLDivElement, CardProps>(({ children, className, ...props }, ref) => {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-    >
-      <div ref={ref} className={cn(cardVariants({ ...props }), className)} {...props}>
-        {children}
-      </div>
-    </motion.div>
+    <div ref={ref} className={cn(cardVariants({ ...props }), className)} {...props}>
+      {children}
+    </div>
   )
 })
 Card.displayName = "Card"

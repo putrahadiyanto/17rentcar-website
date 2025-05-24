@@ -1,10 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { logout as apiLogout } from '@/lib/auth-api';
 
 export default function AdminHeader() {
-    const { logout } = useAuth();
+    const router = useRouter();
 
     return (
         <header className="bg-white shadow">
@@ -14,9 +15,18 @@ export default function AdminHeader() {
                         <Link href="/admin/dashboard" className="text-xl font-bold text-gray-900">
                             17RentCar Admin
                         </Link>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <Button variant="ghost" onClick={logout}>
+                    </div>                    <div className="flex items-center space-x-4">
+                        <Button
+                            variant="ghost"
+                            onClick={async () => {
+                                try {
+                                    await apiLogout();
+                                    router.push('/admin/login');
+                                } catch (error) {
+                                    console.error('Logout failed:', error);
+                                }
+                            }}
+                        >
                             Logout
                         </Button>
                     </div>

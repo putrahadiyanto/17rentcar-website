@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+import React, { useEffect, useState } from 'react';
 import AdminHeader from '@/components/admin-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,22 +9,19 @@ import { Button } from '@/components/ui/button';
 import { carData } from '@/data/car-data';
 import { tourPackages } from '@/data/tour-packages';
 import {
-    BarChart,
-    Calendar,
     Car,
     Edit,
     MapPin,
     MoreVertical,
     Plus,
-    Trash2,
-    TrendingUp,
-    Users
+    Trash2
 } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import axios from 'axios';
 
 export default function AdminDashboard() {
-    const { isAuthenticated } = useAuth();
-    const router = useRouter();    const [cars, setCars] = useState(() => [...carData]);
+    const router = useRouter();
+    const [cars, setCars] = useState(() => [...carData]);
     const [visibleCars, setVisibleCars] = useState<{ [key: string]: boolean }>(() => {
         // Inisialisasi semua mobil sebagai terlihat secara default
         const initialState: { [key: string]: boolean } = {};
@@ -33,17 +29,17 @@ export default function AdminDashboard() {
             initialState[car.id] = true;
         });
         return initialState;
-    });
+    });    // We'll rely solely on the global AuthProvider for authentication
 
     const toggleCarVisibility = (carId: string) => {
         setVisibleCars(prev => ({
             ...prev,
             [carId]: !prev[carId]
         }));
-        
+
         // In a real application, this would be saved to a database
         console.log(`Visibilitas mobil ${carId} diubah menjadi: ${!visibleCars[carId]}`);
-        
+
         // Show feedback to the user
         const status = !visibleCars[carId] ? 'ditampilkan' : 'disembunyikan';
         alert(`Mobil akan ${status} di beranda`);
@@ -53,20 +49,19 @@ export default function AdminDashboard() {
         if (confirm('Yakin ingin menghapus mobil ini? Tindakan ini tidak dapat dibatalkan.')) {
             // Remove from local state (mock deletion)
             setCars(prevCars => prevCars.filter(car => car.id !== carId));
-            
+
             // Remove from visibility state
             setVisibleCars((prev) => {
                 const newState = { ...prev };
                 delete newState[carId];
                 return newState;
             });
-            
+
             // In a real app, this would call an API to delete the car
             alert('Mobil berhasil dihapus');
         }
-    };
+    };    // Authentication is now handled by the AuthProvider in layout.tsx
 
-    // Halaman ini dilindungi oleh middleware
     return (
         <div className="min-h-screen bg-gray-100">
             <AdminHeader />
