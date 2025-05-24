@@ -1,1 +1,0 @@
-// This file has been removed. Authentication is now handled solely by middleware.

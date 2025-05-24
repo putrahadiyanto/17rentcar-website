@@ -48,8 +48,13 @@ export async function logout() {
     console.log('[auth] Logging out...');
     try {
         const baseUrl = getLaravelBaseUrl();
+        // Get the XSRF token from the cookie
+        const xsrfToken = getCookieValue('XSRF-TOKEN');
         const response = await axios.post(`${baseUrl}/logout`, {}, {
             withCredentials: true,
+            headers: xsrfToken
+                ? { 'X-XSRF-TOKEN': decodeURIComponent(xsrfToken) }
+                : {},
         });
         console.log('[auth] Logout response:', response.status);
         return response.data;
@@ -58,6 +63,13 @@ export async function logout() {
         console.error('[auth] Logout error:', err);
         throw new Error(errorMsg);
     }
+}
+
+// Helper to get a cookie value by name
+function getCookieValue(name: string): string | undefined {
+    if (typeof document === 'undefined') return undefined;
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : undefined;
 }
 
 export async function getUser() {
