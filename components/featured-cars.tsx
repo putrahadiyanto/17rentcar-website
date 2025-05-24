@@ -7,13 +7,50 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Car, Users, Fuel } from "lucide-react"
-import { carData } from "@/data/car-data"
 import { motion, AnimatePresence } from "framer-motion"
+import { fetchCars } from "@/lib/api-services"
+import { CarType } from "@/types/car"
+import LoadingSpinner from "@/components/loading-spinner"
+import ApiError from "@/components/api-error"
 
 export default function FeaturedCars() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const featuredCars = carData.slice(0, 6)
+  const [featuredCars, setFeaturedCars] = useState<CarType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch cars from API
+  useEffect(() => {
+    const getFeaturedCars = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const cars = await fetchCars()
+        // Use only the first 6 cars for featured section
+        setFeaturedCars(cars.slice(0, 6))
+      } catch (err) {
+        console.error("Failed to fetch featured cars:", err)
+        setError("Gagal memuat data mobil. Silakan coba lagi nanti.")
+
+        // Fallback to mock data in development environment
+        if (process.env.NODE_ENV === "development") {
+          try {
+            const { carData } = await import("@/data/car-data")
+            console.log("Using fallback mock data for featured cars")
+            setFeaturedCars(carData.slice(0, 6))
+            setError(null)
+          } catch (mockErr) {
+            console.error("Failed to load fallback data:", mockErr)
+          }
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getFeaturedCars()
+  }, [])
 
   const scrollToIndex = (index: number) => {
     if (containerRef.current) {
@@ -48,6 +85,32 @@ export default function FeaturedCars() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [currentIndex])
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <LoadingSpinner size={40} />
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error && featuredCars.length === 0) {
+    return (
+      <div className="py-8">
+        <ApiError message={error} onRetry={() => setError(null)} />
+      </div>
+    )
+  }
+
+  // If no featured cars after loading, show message
+  if (featuredCars.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-500">Tidak ada mobil yang tersedia saat ini. Silakan coba lagi nanti.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative">

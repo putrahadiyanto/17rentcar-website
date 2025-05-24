@@ -32,10 +32,25 @@ export default function CarDetailPage() {
         const carData = await fetchCarById(carId)
 
         if (carData) {
+          // Parse features if it's a string representation of JSON array
+          let parsedFeatures = []
+          if (carData.features) {
+            if (typeof carData.features === 'string') {
+              try {
+                parsedFeatures = JSON.parse(carData.features)
+              } catch (e) {
+                console.error('Error parsing features:', e)
+                parsedFeatures = []
+              }
+            } else if (Array.isArray(carData.features)) {
+              parsedFeatures = carData.features
+            }
+          }
+
           // Ensure car data has all required properties or provide defaults
           const processedCar = {
             ...carData,
-            features: carData.features || [],
+            features: parsedFeatures,
             description: carData.description || 'Tidak ada deskripsi tersedia',
             shortDescription: carData.shortDescription || ''
           };
@@ -131,7 +146,7 @@ export default function CarDetailPage() {
               Fitur Utama
             </h3>
               <div className="grid grid-cols-2 gap-y-3">
-                {car.features && Array.isArray(car.features) ? car.features.map((feature, index) => (
+                {car.features && car.features.length > 0 ? car.features.map((feature, index) => (
                   <motion.div
                     key={index}
                     className="flex items-center"
