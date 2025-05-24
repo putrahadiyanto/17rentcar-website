@@ -1,162 +1,81 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000'; // Change to your backend URL
-
-// Configure axios for Laravel Sanctum
-axios.defaults.withCredentials = true;
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-axios.defaults.headers.common['Accept'] = 'application/json';
-
-// Configure axios defaults for working with Laravel Sanctum
-axios.defaults.withCredentials = true;
-axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
-axios.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
-
-export async function getCsrfCookie() {
-    console.log('Getting CSRF cookie from', `${API_URL}/sanctum/csrf-cookie`);
-    try {
-        const response = await axios.get(`${API_URL}/sanctum/csrf-cookie`, {
-            withCredentials: true,
-        });
-        console.log('CSRF cookie response:', response.status, response.headers);
-        console.log('Cookies after CSRF:', document.cookie);
-        return response;
-    } catch (error) {
-        console.error('Failed to get CSRF cookie:', error);
-        throw error;
-    }
+interface LoginData {
+    email: string
+    password: string
 }
 
-export async function login(email: string, password: string) {
-    console.log('Login attempt with:', { email, apiUrl: API_URL });
+// Helper to get the base URL (client-side, uses NEXT_PUBLIC_ env var)
+function getLaravelBaseUrl() {
+    const apiUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL;
+    if (!apiUrl) throw new Error('NEXT_PUBLIC_LARAVEL_API_URL is not defined');
+    return apiUrl.replace(/\/api$/, '');
+}
 
+export async function login(data: LoginData) {
+    console.log('[auth] Starting login process for', data.email);
+    // First, get the CSRF cookie
     try {
-        // Get CSRF cookie first
-        console.log('Getting CSRF cookie...');
-        await getCsrfCookie();
-        console.log('CSRF cookie obtained');
+        const baseUrl = getLaravelBaseUrl();
+        await axios.get(`${baseUrl}/sanctum/csrf-cookie`, {
+            withCredentials: true,
+        });
+        console.log('[auth] CSRF cookie set');
+    } catch (err) {
+        console.error('[auth] Failed to get CSRF cookie:', err);
+        throw new Error('Failed to get CSRF cookie');
+    }
 
-        // Attempt login
-        console.log('Sending login request...');
-        const res = await axios.post(
-            `${API_URL}/api/login`,
-            { email, password },
-            {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-            }
-        );
-
-        console.log('Login response:', res.status, res.data);
-
-        // For debugging: Log all cookies after login
-        console.log('Cookies after login:', document.cookie);
-
-        // Make an immediate check to verify authentication worked
-        try {
-            const userCheck = await getUser();
-            console.log('User check immediately after login successful:', userCheck);
-        } catch (checkError) {
-            console.error('User authentication check failed immediately after login:', checkError);
-        }
-
-        return res.data;
-    } catch (error: any) {
-        console.error('Login API error:', error.response ? {
-            status: error.response.status,
-            data: error.response.data,
-            headers: error.response.headers
-        } : error.message);
-
-        throw new Error(error.response?.data?.message || 'Login failed');
+    // Then login
+    try {
+        const baseUrl = getLaravelBaseUrl();
+        const response = await axios.post(`${baseUrl}/login`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+        });
+        console.log('[auth] Login response:', response.status);
+        return response.data;
+    } catch (err: any) {
+        const errorMsg = err.response?.data?.message || 'Login failed';
+        console.error('[auth] Login error:', err);
+        throw new Error(errorMsg);
     }
 }
 
 export async function logout() {
-    console.log('Logging out...');
-
+    console.log('[auth] Logging out...');
     try {
-        const response = await axios.post(
-            `${API_URL}/api/logout`,
-            {},
-            {
-                withCredentials: true,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }
-        );
-
-        console.log('Logout response:', response.status, response.data);
-        console.log('Cookies after logout:', document.cookie);
-
+        const baseUrl = getLaravelBaseUrl();
+        const response = await axios.post(`${baseUrl}/logout`, {}, {
+            withCredentials: true,
+        });
+        console.log('[auth] Logout response:', response.status);
         return response.data;
-    } catch (error) {
-        console.error('Logout error:', error);
-        throw error;
+    } catch (err: any) {
+        const errorMsg = err.response?.data?.message || 'Logout failed';
+        console.error('[auth] Logout error:', err);
+        throw new Error(errorMsg);
     }
 }
 
 export async function getUser() {
-    console.log('Checking authentication status...');
-    console.log('Current cookies:', document.cookie);
-
-    // Parse cookies into a more readable format
-    const parsedCookies: Record<string, string> = {};
-    document.cookie.split(';').forEach(cookie => {
-        const [name, value] = cookie.trim().split('=');
-        if (name) parsedCookies[name] = value || '';
-    });
-
-    console.log('Parsed cookies:', parsedCookies);
-    console.log('Important cookies check:', {
-        'laravel_session': parsedCookies['laravel_session'] ? 'exists' : 'missing',
-        'XSRF-TOKEN': parsedCookies['XSRF-TOKEN'] ? 'exists' : 'missing',
-    });
-
+    console.log('[auth] Fetching user info...');
     try {
-        // Add a timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        const res = await axios.get(`${API_URL}/api/user?_=${timestamp}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL;
+        if (!apiUrl) throw new Error('NEXT_PUBLIC_LARAVEL_API_URL is not defined');
+        const response = await axios.get(`${apiUrl}/user`, {
             withCredentials: true,
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
         });
-
-        console.log('User authenticated:', res.data);
-        return res.data;
-    } catch (error: any) {
-        const statusCode = error.response?.status;
-        const errorData = {
-            status: statusCode,
-            data: error.response?.data,
-            headers: error.response?.headers,
-            message: error.message
-        };
-
-        // Provide more helpful error messages based on status code
-        let errorMessage = 'Not authenticated';
-        if (statusCode === 401) {
-            errorMessage = 'Session expired or invalid';
-            console.error('Authentication check failed (401 Unauthorized):', errorData);
-        } else if (statusCode === 419) {
-            errorMessage = 'CSRF token mismatch';
-            console.error('Authentication check failed (419 CSRF Error):', errorData);
-        } else if (statusCode === 500) {
-            errorMessage = 'Server error';
-            console.error('Authentication check failed (500 Server Error):', errorData);
-        } else {
-            console.error('Authentication check failed:', errorData);
+        console.log('[auth] getUser response:', response.status);
+        return response.data;
+    } catch (err: any) {
+        if (err.response && err.response.status === 401) {
+            console.warn('[auth] getUser: not authenticated');
+            return null;
         }
-
-        throw new Error(errorMessage);
+        console.error('[auth] getUser error:', err);
+        return null;
     }
 }

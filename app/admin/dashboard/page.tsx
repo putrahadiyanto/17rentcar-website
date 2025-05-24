@@ -306,3 +306,5 @@ export default function AdminDashboard() {
         </div>
     );
 }
+
+// This page is protected by middleware. No client-side auth logic is needed.

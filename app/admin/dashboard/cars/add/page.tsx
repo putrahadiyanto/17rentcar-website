@@ -3,21 +3,21 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminHeader from '@/components/admin-header';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
 } from '@/components/ui/card';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,7 @@ const carFormSchema = z.object({
 export default function AddCarPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Initialize the form
   const form = useForm<z.infer<typeof carFormSchema>>({
     resolver: zodResolver(carFormSchema),
@@ -72,19 +72,19 @@ export default function AddCarPage() {
       isVisible: true,
     },
   });
-  
+
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof carFormSchema>) => {
     setIsSubmitting(true);
-    
+
     try {
       // In a real app, you would send this data to an API
       // For now, we'll just mock the addition and show a success message
       console.log('New car data:', values);
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Show success alert and redirect back to dashboard
       alert('Car added successfully!');
       router.push('/admin/dashboard');
@@ -95,26 +95,26 @@ export default function AddCarPage() {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-100">
       <AdminHeader />
-      
+
       <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="mb-4 flex items-center gap-1"
           onClick={() => router.push('/admin/dashboard')}
         >
-          <ChevronLeft className="h-4 w-4" /> 
+          <ChevronLeft className="h-4 w-4" />
           Kembali ke Dasbor
         </Button>
-        
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Tambah Mobil Baru</h1>
           <p className="mt-1 text-gray-500">Tambahkan detail mobil baru ke database.</p>
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Form Mobil Baru</CardTitle>
@@ -140,7 +140,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="brand"
@@ -154,7 +154,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="type"
@@ -179,7 +179,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="price"
@@ -193,7 +193,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="capacity"
@@ -207,7 +207,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="transmission"
@@ -230,7 +230,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="fuelType"
@@ -254,7 +254,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="year"
@@ -268,7 +268,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="color"
@@ -282,7 +282,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="whatsappLink"
@@ -299,7 +299,7 @@ export default function AddCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="image"
@@ -322,7 +322,7 @@ export default function AddCarPage() {
                     )}
                   />
                 </div>
-                
+
                 {/* Descriptions */}
                 <div className="grid grid-cols-1 gap-6">
                   <FormField
@@ -332,16 +332,16 @@ export default function AddCarPage() {
                       <FormItem>
                         <FormLabel>Deskripsi Singkat</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="MPV 7 seater yang nyaman dan ekonomis untuk perjalanan keluarga" 
-                            {...field} 
+                          <Input
+                            placeholder="MPV 7 seater yang nyaman dan ekonomis untuk perjalanan keluarga"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="description"
@@ -349,10 +349,10 @@ export default function AddCarPage() {
                       <FormItem>
                         <FormLabel>Deskripsi Lengkap</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Deskripsi detail tentang mobil" 
-                            className="min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Deskripsi detail tentang mobil"
+                            className="min-h-[120px]"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -360,7 +360,7 @@ export default function AddCarPage() {
                     )}
                   />
                 </div>
-                
+
                 {/* Visibility toggle */}
                 <FormField
                   control={form.control}
@@ -382,10 +382,10 @@ export default function AddCarPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="flex justify-end">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting}
                     className="flex items-center gap-2 w-full md:w-auto"
                   >
@@ -406,3 +406,5 @@ export default function AddCarPage() {
     </div>
   );
 }
+
+// This page is protected by middleware. No client-side auth logic is needed.

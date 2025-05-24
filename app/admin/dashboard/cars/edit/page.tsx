@@ -3,21 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AdminHeader from '@/components/admin-header';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
 } from '@/components/ui/card';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -56,11 +56,11 @@ export default function EditCarPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const carId = searchParams?.get('id');
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Initialize the form
   const form = useForm<FormValues>({
     resolver: zodResolver(carFormSchema),
@@ -82,7 +82,7 @@ export default function EditCarPage() {
       isVisible: true,
     },
   });
-  
+
   // Load car data on component mount
   useEffect(() => {
     if (!carId) {
@@ -90,17 +90,17 @@ export default function EditCarPage() {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       // Find the car by ID
       const car = carData.find(car => car.id === carId);
-      
+
       if (!car) {
         setError('Car not found');
         setIsLoading(false);
         return;
       }
-      
+
       // Set form values
       form.reset({
         id: car.id,
@@ -119,7 +119,7 @@ export default function EditCarPage() {
         whatsappLink: '', // This field doesn't exist in the original data
         isVisible: true, // This field doesn't exist in the original data
       });
-      
+
       setIsLoading(false);
     } catch (err) {
       console.error('Error loading car data:', err);
@@ -127,19 +127,19 @@ export default function EditCarPage() {
       setIsLoading(false);
     }
   }, [carId, form]);
-  
+
   // Handle form submission
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
-    
+
     try {
       // In a real app, you would send this data to an API
       // For now, we'll just mock the update and show a success message
       console.log('Updated car data:', values);
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Show success alert and redirect back to dashboard
       alert('Car updated successfully!');
       router.push('/admin/dashboard');
@@ -150,7 +150,7 @@ export default function EditCarPage() {
       setIsSubmitting(false);
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -161,7 +161,7 @@ export default function EditCarPage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -180,26 +180,26 @@ export default function EditCarPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-100">
       <AdminHeader />
-      
+
       <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="mb-4 flex items-center gap-1"
           onClick={() => router.push('/admin/dashboard')}
         >
-          <ChevronLeft className="h-4 w-4" /> 
+          <ChevronLeft className="h-4 w-4" />
           Kembali ke Dasbor
         </Button>
-        
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Edit Mobil</h1>
           <p className="mt-1 text-gray-500">Edit informasi mobil yang ada.</p>
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Form Edit Mobil</CardTitle>
@@ -225,7 +225,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="brand"
@@ -239,7 +239,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="type"
@@ -264,7 +264,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="price"
@@ -278,7 +278,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="capacity"
@@ -292,7 +292,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="transmission"
@@ -315,7 +315,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="fuelType"
@@ -339,7 +339,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="year"
@@ -353,7 +353,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="color"
@@ -367,7 +367,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="whatsappLink"
@@ -384,7 +384,7 @@ export default function EditCarPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="image"
@@ -407,7 +407,7 @@ export default function EditCarPage() {
                     )}
                   />
                 </div>
-                
+
                 {/* Descriptions */}
                 <div className="grid grid-cols-1 gap-6">
                   <FormField
@@ -417,16 +417,16 @@ export default function EditCarPage() {
                       <FormItem>
                         <FormLabel>Deskripsi Singkat</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="MPV 7 seater yang nyaman dan ekonomis untuk perjalanan keluarga" 
-                            {...field} 
+                          <Input
+                            placeholder="MPV 7 seater yang nyaman dan ekonomis untuk perjalanan keluarga"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="description"
@@ -434,10 +434,10 @@ export default function EditCarPage() {
                       <FormItem>
                         <FormLabel>Deskripsi Lengkap</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Deskripsi detail tentang mobil" 
-                            className="min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Deskripsi detail tentang mobil"
+                            className="min-h-[120px]"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -445,7 +445,7 @@ export default function EditCarPage() {
                     )}
                   />
                 </div>
-                
+
                 {/* Visibility toggle */}
                 <FormField
                   control={form.control}
@@ -467,7 +467,7 @@ export default function EditCarPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="flex justify-end gap-4">
                   <Button
                     type="button"
@@ -476,8 +476,8 @@ export default function EditCarPage() {
                   >
                     Batal
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting}
                     className="flex items-center gap-2"
                   >
@@ -498,3 +498,5 @@ export default function EditCarPage() {
     </div>
   );
 }
+
+// This page is protected by middleware. No client-side auth logic is needed.

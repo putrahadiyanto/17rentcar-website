@@ -2,19 +2,28 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import debugAuthTokens from '@/lib/auth-debug';
 
 export default function AdminPage() {
     const router = useRouter();
 
-    // Redirect ke dashboard saat mengakses halaman root admin
+    // Debug authentication tokens
     useEffect(() => {
-        router.push('/admin/dashboard');
-    }, [router]);
+        console.log('[Admin Page] Initial load');
+        // Run the auth token debug utility
+        debugAuthTokens();
+    }, []);
 
-    // Halaman ini hanya untuk redirect, jadi tampilkan konten minimal
+    // This page is protected by middleware. No client-side auth logic is needed.
+
+    // Show loading or redirection message with debugging info
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <p>Mengalihkan ke dashboard...</p>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+                <>
+                    <p className="text-gray-600">Mengalihkan ke halaman yang sesuai...</p>
+                </>
+            </div>
         </div>
     );
 }

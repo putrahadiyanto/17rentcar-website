@@ -5,7 +5,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { FilterProvider } from "@/contexts/filter-context"
-import { AuthProvider } from "@/contexts/auth-context"
 import LayoutWrapper from "@/components/layout-wrapper"
 import FloatingWhatsAppButton from "@/components/floating-whatsapp-button"
 
@@ -89,15 +88,13 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={`${poppins.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-          <AuthProvider>
-            <FilterProvider>
-              <LayoutWrapper>
-                {children}
-              </LayoutWrapper>
-              <FloatingWhatsAppButton />
-              <Toaster />
-            </FilterProvider>
-          </AuthProvider>
+          <FilterProvider>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+            <FloatingWhatsAppButton />
+            <Toaster />
+          </FilterProvider>
         </ThemeProvider>
       </body>
     </html>

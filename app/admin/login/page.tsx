@@ -21,27 +21,24 @@ export default function AdminLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const redirectPath = searchParams.get('redirect') || '/admin/dashboard'; const handleSubmit = async (e: React.FormEvent) => {
+    const redirectPath = searchParams.get('redirect') || '/admin/dashboard';
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
 
         try {
-            console.log('Attempting login with:', { email }); // Debug
-            const response = await apiLogin(email, password); console.log('Login successful!', response); // Debug
+            console.log('Attempting login with:', { email });
+            const response = await apiLogin({ email, password });
+            console.log('Login successful!', response);
 
-            // Check cookies after login
-            console.log('Login page: Cookies after login:', document.cookie);
-
-            // Show success message in UI before redirect
             setError('Login successful! Redirecting to dashboard...');
-
-            // Small delay to show the success message
             setTimeout(() => {
                 router.push(redirectPath);
             }, 1000);
         } catch (error: any) {
-            console.error('Login error:', error); // Detailed error logging
+            console.error('Login error:', error);
             if (error instanceof Error && error.message === 'Login failed') {
                 setError('Email atau password salah. Silakan coba lagi.');
             } else {
