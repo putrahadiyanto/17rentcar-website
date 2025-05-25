@@ -6,6 +6,13 @@ export async function middleware(request: NextRequest) {
     const isLoginPage = pathname === '/admin/login';
 
     console.log(`[Middleware] Incoming request to: ${pathname}`);
+
+    // Redirect "/admin" root route directly to dashboard
+    if (pathname === '/admin' || pathname === '/admin/') {
+        console.log('[Middleware] Admin root route detected, redirecting to dashboard');
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+
     // Only protect admin routes except /admin/login
     if (isAdminRoute && !isLoginPage) {
         // Get all cookies from the request
@@ -49,8 +56,7 @@ export async function middleware(request: NextRequest) {
             if (!user.is_admin) {
                 console.log('[Middleware] User is not admin. Redirecting to /');
                 return NextResponse.redirect(new URL('/', request.url));
-            }
-            console.log('[Middleware] User is admin. Access granted.');
+            } console.log('[Middleware] User is admin. Access granted.');
         } catch (error) {
             console.log('[Middleware] Error during backend validation:', error);
             return NextResponse.redirect(new URL('/admin/login', request.url));
