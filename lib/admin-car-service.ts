@@ -35,7 +35,7 @@ export const AdminCarService = {
         try {
             console.log(`[AdminCarService] Getting car with ID: ${id}`);
             const response = await axios.get(`${ADMIN_CARS_API_URL}?id=${id}`);
-            return response.data;
+            return response.data.data;
         } catch (error) {
             console.error(`[AdminCarService] Error getting car ${id}:`, error);
             handleApiError(error as AxiosError);

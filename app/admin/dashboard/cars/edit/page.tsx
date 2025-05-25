@@ -37,9 +37,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ChevronLeft, Save, Upload, X, Car, Image as ImageIcon, Plus } from 'lucide-react';
-import { carData } from '@/data/car-data';
 import { CarType } from '@/types/car';
 import Image from 'next/image';
+import AdminCarService from '@/lib/admin-car-service';
 
 // Available car features
 const AVAILABLE_FEATURES = [
@@ -140,95 +140,103 @@ export default function EditCarPage() {
     } else {
       setPreviewImage(null);
     }
-  }, [selectedImageFile, form]);
-  // Load car data on component mount
+  }, [selectedImageFile, form]);  // Load car data from API on component mount
   useEffect(() => {
-    if (!carId) {
-      setError('Car ID is required');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Find the car by ID
-      const car = carData.find(car => car.id === carId);
-
-      if (!car) {
-        setError('Car not found');
+    const fetchCarData = async () => {
+      if (!carId) {
+        setError('Car ID is required');
         setIsLoading(false);
         return;
       }
 
-      // Parse features if available
-      let parsedFeatures: string[] = [];
-      if (car.features) {
-        if (typeof car.features === 'string') {
-          try {
-            parsedFeatures = JSON.parse(car.features);
-          } catch (e) {
-            console.error('Error parsing features:', e);
-          }
-        } else if (Array.isArray(car.features)) {
-          parsedFeatures = car.features;
+      try {
+        // Get car data from API service
+        const car = await AdminCarService.getCarById(carId);
+
+        if (!car) {
+          setError('Car not found');
+          setIsLoading(false);
+          return;
         }
-      }      // Parse transmission to ensure it's an array
-      let parsedTransmission: string[] = [];
-      if (car.transmission) {
-        if (typeof car.transmission === 'string') {
-          const transmissionStr = car.transmission as string;
-          if (transmissionStr.startsWith('[')) {
+
+        // Parse features if available
+        let parsedFeatures: string[] = [];
+        if (car.features) {
+          if (typeof car.features === 'string') {
             try {
-              parsedTransmission = JSON.parse(transmissionStr);
+              parsedFeatures = JSON.parse(car.features);
             } catch (e) {
+              console.error('Error parsing features:', e);
+            }
+          } else if (Array.isArray(car.features)) {
+            parsedFeatures = car.features;
+          }
+        }
+
+        // Parse transmission to ensure it's an array
+        let parsedTransmission: string[] = [];
+        if (car.transmission) {
+          if (typeof car.transmission === 'string') {
+            const transmissionStr = car.transmission as string;
+            if (transmissionStr.startsWith('[')) {
+              try {
+                parsedTransmission = JSON.parse(transmissionStr);
+              } catch (e) {
+                parsedTransmission = [transmissionStr];
+              }
+            } else {
               parsedTransmission = [transmissionStr];
             }
-          } else {
-            parsedTransmission = [transmissionStr];
+          } else if (Array.isArray(car.transmission)) {
+            parsedTransmission = car.transmission;
           }
-        } else if (Array.isArray(car.transmission)) {
-          parsedTransmission = car.transmission;
         }
-      }// Set form values
-      form.reset({
-        id: car.id,
-        name: car.name,
-        brand: car.brand,
-        type: car.type,
-        price: car.price,
-        image: car.image,
-        capacity: car.capacity,
-        transmission: parsedTransmission,
-        fuelType: car.fuelType,
-        year: car.year,
-        shortDescription: car.shortDescription,
-        description: car.description,
-        features: parsedFeatures,
-        isShowing: car.isShowing !== undefined ? car.isShowing : true,
-      });
 
-      // Set preview image if available
-      if (car.image) {
-        setPreviewImage(car.image);
+        // Set form values
+        form.reset({
+          id: car.id,
+          name: car.name,
+          brand: car.brand,
+          type: car.type,
+          price: car.price,
+          image: car.image,
+          capacity: car.capacity,
+          transmission: parsedTransmission,
+          fuelType: car.fuelType,
+          year: car.year,
+          shortDescription: car.shortDescription,
+          description: car.description,
+          features: parsedFeatures,
+          isShowing: car.isShowing !== undefined ? car.isShowing : true,
+        });
+
+        // Set preview image if available
+        if (car.image) {
+          setPreviewImage(car.image);
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error loading car data:', err);
+        setError('Failed to load car data');
+        setIsLoading(false);
       }
+    };
 
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error loading car data:', err);
-      setError('Failed to load car data');
-      setIsLoading(false);
-    }
-  }, [carId, form]);
-  // Handle form submission
+    fetchCarData();
+  }, [carId, form]);  // Handle form submission
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
 
     try {
-      // In a real app, you would send this data to an API
-      // For now, we'll just mock the update and show a success message
-      console.log('Updated car data:', values);
+      // Send updated car data to API service
+      const updatedCar = await AdminCarService.updateCar(values.id, values);
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!updatedCar) {
+        throw new Error('Failed to update car data');
+      }
+
+      console.log('Car updated successfully:', updatedCar);
 
       // Show success alert and redirect back to dashboard
       alert('Mobil berhasil diperbarui!');
