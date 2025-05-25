@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                             </Card>
                         </div>
 
-                        <div className="grid gap-4 md:grid-cols-2 mt-4">
+                        <div className="grid gap-4 md:grid-cols-1 mt-4">
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Popularitas Mobil</CardTitle>
@@ -234,8 +234,8 @@ export default function AdminDashboard() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Nama</TableHead>
+                                        <TableHead>Tahun</TableHead>
                                         <TableHead>Tipe</TableHead>
-                                        <TableHead>Kapasitas</TableHead>
                                         <TableHead className="hidden md:table-cell">Transmisi</TableHead>
                                         <TableHead className="text-right">Harga/Hari</TableHead>
                                         <TableHead>Tampilkan di Beranda</TableHead>
@@ -265,8 +265,8 @@ export default function AdminDashboard() {
                                         cars.map((car) => (
                                             <TableRow key={car.id}>
                                                 <TableCell className="font-medium">{car.name}</TableCell>
+                                                <TableCell>{car.year}</TableCell>
                                                 <TableCell>{car.type}</TableCell>
-                                                <TableCell>{car.capacity} Orang</TableCell>
                                                 <TableCell className="hidden md:table-cell">
                                                     {Array.isArray(car.transmission)
                                                         ? car.transmission.join(", ")
