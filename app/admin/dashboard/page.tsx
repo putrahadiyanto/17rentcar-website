@@ -13,79 +13,110 @@ import {
     MapPin,
     MoreVertical,
     Plus,
-    Trash2
+    Trash2,
+    AlertCircle,
+    Loader2
 } from 'lucide-react';
 import { useRouter } from "next/navigation";
-import axios from 'axios';
+import { CarType } from '@/types/car';
+import AdminCarService from '@/lib/admin-car-service';
 
 export default function AdminDashboard() {
     const router = useRouter();
-    const [cars, setCars] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [cars, setCars] = useState<CarType[]>([]);
     const [visibleCars, setVisibleCars] = useState<{ [key: string]: boolean }>({});
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
+    // Fetch cars from BFF API on component mount
     useEffect(() => {
         const fetchCars = async () => {
             setLoading(true);
             setError(null);
             try {
-                const res = await axios.get('/api/admin/cars');
-                setCars(res.data);
+                const data = await AdminCarService.getAllCars();
+
+                // Ensure we have an array of cars
+                const carsArray = Array.isArray(data) ? data : [];
+                setCars(carsArray);
+
                 // Set all cars as visible by default
                 const initialState: { [key: string]: boolean } = {};
-                (Array.isArray(res.data) ? res.data : []).forEach((car: any) => {
-                    initialState[car.id] = true;
+                carsArray.forEach((car: CarType) => {
+                    initialState[car.id] = car.isShowing === true; // Use isShowing from backend
                 });
                 setVisibleCars(initialState);
             } catch (err: any) {
-                setError(err?.response?.data?.error || err.message || 'Gagal memuat data mobil');
+                console.error('Error fetching cars:', err);
+                setError(err?.message || 'Failed to load cars');
             } finally {
                 setLoading(false);
             }
         };
-        fetchCars();
-    }, []);
 
-    const toggleCarVisibility = (carId: string) => {
+        fetchCars();
+    }, []); const toggleCarVisibility = async (carId: string) => {
+        // Optimistically update the UI
+        const newVisibility = !visibleCars[carId];
         setVisibleCars(prev => ({
             ...prev,
-            [carId]: !prev[carId]
+            [carId]: newVisibility
         }));
 
-        // In a real application, this would be saved to a database
-        console.log(`Visibilitas mobil ${carId} diubah menjadi: ${!visibleCars[carId]}`);
+        try {
+            // Call the API to update visibility in the database
+            await AdminCarService.toggleCarVisibility(carId, newVisibility);
 
-        // Show feedback to the user
-        const status = !visibleCars[carId] ? 'ditampilkan' : 'disembunyikan';
-        alert(`Mobil akan ${status} di beranda`);
+            // Show feedback to the user
+            const status = newVisibility ? 'ditampilkan' : 'disembunyikan';
+            alert(`Mobil akan ${status} di beranda`);
+        } catch (err) {
+            // Revert on failure
+            setVisibleCars(prev => ({
+                ...prev,
+                [carId]: !newVisibility
+            }));
+            alert('Gagal mengubah visibilitas mobil. Silakan coba lagi.');
+        }
     };
 
-    const handleDeleteCar = (carId: string) => {
+    const handleDeleteCar = async (carId: string) => {
         if (confirm('Yakin ingin menghapus mobil ini? Tindakan ini tidak dapat dibatalkan.')) {
-            // Remove from local state (mock deletion)
-            setCars(prevCars => prevCars.filter(car => car.id !== carId));
+            try {
+                // Call the API to delete the car
+                const success = await AdminCarService.deleteCar(carId);
 
-            // Remove from visibility state
-            setVisibleCars((prev) => {
-                const newState = { ...prev };
-                delete newState[carId];
-                return newState;
-            });
+                if (success) {
+                    // Update local state after successful deletion
+                    setCars(prevCars => prevCars.filter(car => car.id !== carId));
 
-            // In a real app, this would call an API to delete the car
-            alert('Mobil berhasil dihapus');
+                    // Remove from visibility state
+                    setVisibleCars((prev) => {
+                        const newState = { ...prev };
+                        delete newState[carId];
+                        return newState;
+                    });
+
+                    alert('Mobil berhasil dihapus');
+                } else {
+                    throw new Error('Failed to delete car');
+                }
+            } catch (err) {
+                alert('Gagal menghapus mobil. Silakan coba lagi.');
+            }
         }
-    };    // Authentication is now handled by the AuthProvider in layout.tsx
+    };// Authentication is now handled by the AuthProvider in layout.tsx
 
     return (
         <div className="min-h-screen bg-gray-100">
             <AdminHeader />
+
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
                     <p className="mt-1 text-gray-500">Selamat datang di dasbor admin 17RentCar.</p>
                 </div>
+
                 <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="mb-4">
                         <TabsTrigger value="overview">Ringkasan</TabsTrigger>
@@ -198,42 +229,65 @@ export default function AdminDashboard() {
                             <Button size="sm" className="flex items-center gap-1" onClick={() => router.push("/admin/dashboard/cars/add")}>
                                 <Plus className="h-4 w-4" /> Tambah Mobil Baru
                             </Button>
-                        </div>
-                        <div className="rounded-md border">
-                            {loading ? (
-                                <div className="text-center py-8 text-gray-500">Memuat data mobil...</div>
-                            ) : error ? (
-                                <div className="text-center py-8 text-red-500">{error}</div>
-                            ) : (
-                                <Table>
-                                    <TableHeader>
+                        </div>                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nama</TableHead>
+                                        <TableHead>Tipe</TableHead>
+                                        <TableHead>Kapasitas</TableHead>
+                                        <TableHead className="hidden md:table-cell">Transmisi</TableHead>
+                                        <TableHead className="text-right">Harga/Hari</TableHead>
+                                        <TableHead>Tampilkan di Beranda</TableHead>
+                                        <TableHead className="w-[100px]">Aksi</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {loading ? (
                                         <TableRow>
-                                            <TableHead>Nama</TableHead>
-                                            <TableHead>Tipe</TableHead>
-                                            <TableHead>Kapasitas</TableHead>
-                                            <TableHead className="hidden md:table-cell">Transmisi</TableHead>
-                                            <TableHead className="text-right">Harga/Hari</TableHead>
-                                            <TableHead>Tampilkan di Beranda</TableHead>
-                                            <TableHead className="w-[100px]">Aksi</TableHead>
+                                            <TableCell colSpan={7} className="h-24">
+                                                <div className="flex justify-center items-center">
+                                                    <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                                                    <span className="ml-2">Memuat data mobil...</span>
+                                                </div>
+                                            </TableCell>
                                         </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {cars.slice(0, 5).map((car) => (
+                                    ) : error ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} className="h-24">
+                                                <div className="flex justify-center items-center">
+                                                    <AlertCircle className="h-8 w-8 text-red-500" />
+                                                    <span className="ml-2 text-red-500">Error: {error}</span>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : Array.isArray(cars) && cars.length > 0 ? (
+                                        cars.map((car) => (
                                             <TableRow key={car.id}>
                                                 <TableCell className="font-medium">{car.name}</TableCell>
                                                 <TableCell>{car.type}</TableCell>
                                                 <TableCell>{car.capacity} Orang</TableCell>
-                                                <TableCell className="hidden md:table-cell">{Array.isArray(car.transmission) ? (car.transmission.length === 2 ? "AT/MT" : car.transmission[0]) : typeof car.transmission === 'string' && car.transmission.startsWith('[') ? (JSON.parse(car.transmission).length === 2 ? "AT/MT" : JSON.parse(car.transmission)[0]) : car.transmission}</TableCell>
-                                                <TableCell className="text-right">Rp {car.price?.toLocaleString()}</TableCell>
+                                                <TableCell className="hidden md:table-cell">
+                                                    {Array.isArray(car.transmission)
+                                                        ? car.transmission.join(", ")
+                                                        : car.transmission}
+                                                </TableCell>
+                                                <TableCell className="text-right">Rp {car.price.toLocaleString()}</TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center justify-center">
                                                         <label className="relative inline-flex items-center cursor-pointer">
                                                             <input
                                                                 type="checkbox"
                                                                 className="sr-only peer"
-                                                                checked={visibleCars[car.id] || false}
-                                                                onChange={() => setVisibleCars(prev => ({ ...prev, [car.id]: !prev[car.id] }))
+                                                                checked={
+                                                                    car.isShowing || false
                                                                 }
+                                                                onChange={async () => {
+                                                                    await toggleCarVisibility(car.id);
+                                                                    setCars(prevCars => prevCars.map(c =>
+                                                                        c.id === car.id ? { ...c, isShowing: !c.isShowing } : c
+                                                                    ));
+                                                                }}
                                                             />
                                                             <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                                                         </label>
@@ -244,26 +298,26 @@ export default function AdminDashboard() {
                                                         <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/dashboard/cars/edit?id=${car.id}`)}>
                                                             <Edit className="h-4 w-4" />
                                                         </Button>
-                                                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => alert('Fitur hapus mobil belum diimplementasikan di BFF ini!')}>
+                                                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteCar(car.id)}>
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
-                                        ))}
-                                        {cars.length === 0 && !loading && (
-                                            <TableRow>
-                                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                                    Tidak ada data mobil yang tersedia.
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            )}
-                        </div>
-                        <div className="flex justify-center mt-4">
-                            <Button variant="outline" onClick={() => alert('Halaman ini akan menampilkan semua daftar mobil. Fitur ini masih dalam pengembangan.')}>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                                Tidak ada data mobil yang tersedia.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>                        <div className="flex justify-center mt-4">
+                            <Button variant="outline" onClick={() => {
+                                router.push('/admin/cars');
+                            }}>
                                 Lihat Semua Mobil ({cars.length})
                             </Button>
                         </div>

@@ -1,16 +1,19 @@
 export interface CarType {
-  id: string
-  name: string
-  brand: string
-  type: string
-  price: number
-  image: string
-  capacity: number
-  transmission: string
-  fuelType: string
-  year: number
-  color: string
-  shortDescription: string
-  description: string
-  features: string[]
+  id: string;
+  name: string;
+  brand: string;
+  type: string;
+  price: number;
+  image: string;
+  capacity: number;
+  transmission: string[];
+  fuelType: string;
+  year: number;
+  isShowing: boolean;
+  shortDescription: string;
+  description: string;
+  features: string[];
+  color?: string;
+  created_at?: string;
+  updated_at?: string;
 }
