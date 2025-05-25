@@ -96,6 +96,7 @@ export default function EditCarPage() {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [featureInput, setFeatureInput] = useState('');
   const [customFeatures, setCustomFeatures] = useState<string[]>([]);
+  const [originalImagePath, setOriginalImagePath] = useState<string | null>(null);
 
   // Combine preset features with custom ones
   const allFeatures = [...AVAILABLE_FEATURES, ...customFeatures.filter((f: string) => !AVAILABLE_FEATURES.includes(f))];
@@ -217,6 +218,8 @@ export default function EditCarPage() {
         if (car.image) {
           setPreviewImage(car.image);
         }
+        // Store the original image path for delete logic
+        setOriginalImagePath(car.image || null);
 
         setIsLoading(false);
       } catch (err) {
@@ -232,8 +235,34 @@ export default function EditCarPage() {
     setIsSubmitting(true);
 
     try {
+      let imagePath = values.image;
+      // Use the original image path for deletion
+      let oldImagePath = originalImagePath;
+      // If a new image file is selected, upload it
+      if (selectedImageFile) {
+        const uploadedPath = await AdminCarService.uploadImage(selectedImageFile);
+        if (uploadedPath) {
+          imagePath = uploadedPath;
+          // Always attempt to delete the old image if it exists and is in /images/cars/
+          if (oldImagePath && oldImagePath.startsWith('/images/cars/')) {
+            console.log('Attempting to delete old image:', oldImagePath, 'after uploading:', uploadedPath);
+            const deleteResult = await AdminCarService.deleteImage(oldImagePath);
+            console.log('Delete result:', deleteResult);
+            if (!deleteResult) {
+              alert('Peringatan: Gambar lama gagal dihapus dari server. Silakan cek secara manual.');
+            }
+          }
+        } else {
+          alert('Gagal mengupload gambar.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
       // Send updated car data to API service
-      const updatedCar = await AdminCarService.updateCar(values.id, values);
+      const updatedCar = await AdminCarService.updateCar(values.id, {
+        ...values,
+        image: imagePath,
+      });
 
       if (!updatedCar) {
         throw new Error('Failed to update car data');
