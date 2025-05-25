@@ -3,6 +3,7 @@ import { CarType } from '@/types/car';
 
 // BFF API endpoint for cars
 const ADMIN_CARS_API_URL = '/api/admin/cars';
+const ADMIN_UPLOAD_API_URL = '/api/admin/upload';
 
 /**
  * Admin Car Service - BFF implementation for car management
@@ -100,8 +101,7 @@ export const AdminCarService = {
      * @param id Car ID
      * @param isVisible Visibility status
      * @returns Promise indicating success or failure
-     */
-    toggleCarVisibility: async (id: string, isVisible: boolean): Promise<boolean> => {
+     */    toggleCarVisibility: async (id: string, isVisible: boolean): Promise<boolean> => {
         try {
             console.log(`[AdminCarService] Setting car ${id} visibility to: ${isVisible}`);
             const response = await axios.patch(`${ADMIN_CARS_API_URL}?id=${id}`, {
@@ -112,6 +112,35 @@ export const AdminCarService = {
             console.error(`[AdminCarService] Error toggling car visibility ${id}:`, error);
             handleApiError(error as AxiosError);
             return false;
+        }
+    },
+
+    /**
+     * Upload an image file
+     * @param file File object to upload
+     * @returns Promise with the image path
+     */
+    uploadImage: async (file: File): Promise<string | null> => {
+        try {
+            console.log('[AdminCarService] Uploading image file:', file.name);
+
+            // Create form data for the file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Send the file to the upload endpoint
+            const response = await axios.post(ADMIN_UPLOAD_API_URL, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // Return the relative path to the image
+            return response.data.filePath || null;
+        } catch (error) {
+            console.error('[AdminCarService] Error uploading image:', error);
+            handleApiError(error as AxiosError);
+            return null;
         }
     },
 };

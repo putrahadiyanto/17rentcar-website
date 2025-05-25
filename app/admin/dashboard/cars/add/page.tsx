@@ -36,9 +36,10 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ChevronLeft, Plus, Upload, X, Car, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Plus, Upload, X, Car, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { carData } from '@/data/car-data';
 import Image from 'next/image';
+import AdminCarService from '@/lib/admin-car-service';
 
 // Available car features
 const AVAILABLE_FEATURES = [
@@ -81,8 +82,10 @@ const carFormSchema = z.object({
 export default function AddCarPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [uploadedImagePath, setUploadedImagePath] = useState<string | null>(null);
   const [featureInput, setFeatureInput] = useState('');
   const [customFeatures, setCustomFeatures] = useState<string[]>([]);
 
@@ -116,7 +119,6 @@ export default function AddCarPage() {
       setFeatureInput('');
     }
   };
-
   // Watch for file selection and update preview
   React.useEffect(() => {
     if (selectedImageFile) {
@@ -128,28 +130,60 @@ export default function AddCarPage() {
     } else {
       setPreviewImage(null);
     }
-  }, [selectedImageFile]);
-
-  // Handle form submission
+  }, [selectedImageFile]);  // No longer need handleFileUpload since we only upload on form submission// Handle form submission
   const onSubmit = async (values: z.infer<typeof carFormSchema>) => {
     setIsSubmitting(true);
 
     try {
-      // In a real app, you would send this data to an API
-      // For now, we'll just mock the addition and show a success message
-      console.log('New car data:', values);
+      // Upload the image only on form submission
+      let imagePath = null;
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (selectedImageFile) {
+        // Set uploading state to show feedback to user
+        setIsUploading(true);
+        console.log('Uploading image to images/cars directory on form submit...');
 
-      // Show success alert and redirect back to dashboard
-      alert('Mobil berhasil ditambahkan!');
-      router.push('/admin/dashboard');
+        // Upload the image now when form is submitted
+        imagePath = await AdminCarService.uploadImage(selectedImageFile);
+
+        if (!imagePath) {
+          setIsUploading(false);
+          throw new Error('Failed to upload image to images/cars directory');
+        }
+
+        console.log('Image successfully uploaded to: ' + imagePath);
+
+        // Store the uploaded path
+        setUploadedImagePath(imagePath);
+        setIsUploading(false);
+      } else {
+        throw new Error('Mohon pilih gambar mobil');
+      }
+
+      // Update the form values with the actual image path
+      const carData = {
+        ...values,
+        image: imagePath
+      };
+
+      console.log('Sending car data to API:', carData);
+
+      // Send car data to the API using AdminCarService
+      const result = await AdminCarService.createCar(carData);
+
+      if (result) {
+        // Show success alert and redirect back to dashboard
+        alert('Mobil berhasil ditambahkan!');
+        router.push('/admin/dashboard');
+      } else {
+        throw new Error('Gagal menambahkan data mobil');
+      }
     } catch (error) {
       console.error('Error adding car:', error);
-      alert('Gagal menambahkan mobil. Silakan coba lagi.');
+      alert('Gagal menambahkan mobil: ' + (error instanceof Error ? error.message : 'Silakan coba lagi.'));
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
@@ -375,22 +409,35 @@ export default function AddCarPage() {
                         <FormItem className="col-span-2">
                           <FormLabel>Gambar Mobil</FormLabel>
                           <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2">
-                              <FormControl>
-                                <Input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={e => {
-                                    const file = e.target.files?.[0] || null;
-                                    setSelectedImageFile(file);
-                                    if (file) {
-                                      field.onChange(file.name); // Or handle upload and set the URL
-                                    } else {
-                                      field.onChange('');
-                                    }
-                                  }}
-                                />
-                              </FormControl>
+                            <div className="flex items-center gap-2">                              <FormControl>
+                              <div className="flex flex-col gap-2">                                <Input
+                                type="file"
+                                accept="image/*"
+                                disabled={isUploading}
+                                onChange={e => {
+                                  const file = e.target.files?.[0] || null;
+                                  setSelectedImageFile(file);
+                                  if (file) {
+                                    // Just set a temporary value and show preview, but don't upload yet
+                                    field.onChange(file.name);
+                                  } else {
+                                    field.onChange('');
+                                    setUploadedImagePath(null);
+                                  }
+                                }}
+                              />                                {isUploading && (
+                                <div className="flex items-center text-sm text-blue-600">
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  <span>Mengunggah gambar ke /images/cars...</span>
+                                </div>
+                              )}
+                                {selectedImageFile && !isUploading && (
+                                  <div className="text-sm text-gray-600">
+                                    Gambar akan diunggah saat form dikirim
+                                  </div>
+                                )}
+                              </div>
+                            </FormControl>
                             </div>
                             {previewImage && (
                               <div className="relative h-32 rounded-md overflow-hidden border">
@@ -399,10 +446,10 @@ export default function AddCarPage() {
                                     type="button"
                                     variant="secondary"
                                     size="icon"
-                                    className="h-6 w-6 rounded-full bg-gray-800/50 backdrop-blur-sm border-0"
-                                    onClick={() => {
+                                    className="h-6 w-6 rounded-full bg-gray-800/50 backdrop-blur-sm border-0" onClick={() => {
                                       setPreviewImage(null);
                                       setSelectedImageFile(null);
+                                      setUploadedImagePath(null);
                                       field.onChange('');
                                     }}
                                   >
@@ -568,27 +615,26 @@ export default function AddCarPage() {
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
                       </Button>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="flex items-center gap-2 min-w-[120px]"
-                          size="lg"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Menyimpan...
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4" /> Tambah Mobil
-                            </>
-                          )}
-                        </Button>
+                      <div className="flex items-center gap-2">                        <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex items-center gap-2 min-w-[120px]"
+                        size="lg"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {isUploading ? 'Mengunggah gambar ke images/cars...' : 'Menyimpan data mobil...'}
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4" /> Tambah Mobil & Unggah Gambar
+                          </>
+                        )}
+                      </Button>
                       </div>
                     </div>
                   </div>
