@@ -4,6 +4,7 @@ import { CarType } from '@/types/car';
 // BFF API endpoint for cars
 const ADMIN_CARS_API_URL = '/api/admin/cars';
 const ADMIN_UPLOAD_API_URL = '/api/admin/upload';
+const ADMIN_DELETE_IMAGE_URL = '/api/admin/upload/delete';
 
 /**
  * Admin Car Service - BFF implementation for car management
@@ -119,8 +120,7 @@ export const AdminCarService = {
      * Upload an image file
      * @param file File object to upload
      * @returns Promise with the image path
-     */
-    uploadImage: async (file: File): Promise<string | null> => {
+     */    uploadImage: async (file: File): Promise<string | null> => {
         try {
             console.log('[AdminCarService] Uploading image file:', file.name);
 
@@ -141,6 +141,28 @@ export const AdminCarService = {
             console.error('[AdminCarService] Error uploading image:', error);
             handleApiError(error as AxiosError);
             return null;
+        }
+    },
+
+    /**
+     * Delete an image file from the server
+     * @param imagePath Path to the image (e.g. /images/cars/123456.jpg)
+     * @returns Promise indicating success or failure
+     */
+    deleteImage: async (imagePath: string): Promise<boolean> => {
+        try {
+            if (!imagePath) return false;
+
+            console.log(`[AdminCarService] Deleting image: ${imagePath}`);
+
+            // Call the delete image API with the path
+            await axios.delete(`${ADMIN_DELETE_IMAGE_URL}?path=${encodeURIComponent(imagePath)}`);
+
+            return true;
+        } catch (error) {
+            console.error('[AdminCarService] Error deleting image:', error);
+            // Don't throw here, just log and continue since this is a secondary operation
+            return false;
         }
     },
 };

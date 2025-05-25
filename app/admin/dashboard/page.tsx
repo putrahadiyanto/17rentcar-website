@@ -87,10 +87,20 @@ export default function AdminDashboard() {
     }; const handleDeleteCar = async (carId: string) => {
         if (confirm('Yakin ingin menghapus mobil ini? Tindakan ini tidak dapat dibatalkan.')) {
             try {
+                // Find the car to get its image path
+                const carToDelete = cars.find(car => car.id === carId);
+                const imagePath = carToDelete?.image;
+
                 // Call the API to delete the car
                 const success = await AdminCarService.deleteCar(carId);
 
                 if (success) {
+                    // If the car had an image, also delete the image file from images/cars
+                    if (imagePath && imagePath.startsWith('/images/cars/')) {
+                        console.log(`Attempting to delete image file: ${imagePath}`);
+                        await AdminCarService.deleteImage(imagePath);
+                    }
+
                     // Update local state after successful deletion
                     setCars(prevCars => prevCars.filter(car => car.id !== carId));
 
