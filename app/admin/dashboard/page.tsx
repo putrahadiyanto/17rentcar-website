@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { carData } from '@/data/car-data';
 import { tourPackages } from '@/data/tour-packages';
 import {
     Car,
@@ -21,15 +20,32 @@ import axios from 'axios';
 
 export default function AdminDashboard() {
     const router = useRouter();
-    const [cars, setCars] = useState(() => [...carData]);
-    const [visibleCars, setVisibleCars] = useState<{ [key: string]: boolean }>(() => {
-        // Inisialisasi semua mobil sebagai terlihat secara default
-        const initialState: { [key: string]: boolean } = {};
-        carData.forEach(car => {
-            initialState[car.id] = true;
-        });
-        return initialState;
-    });    // We'll rely solely on the global AuthProvider for authentication
+    const [cars, setCars] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [visibleCars, setVisibleCars] = useState<{ [key: string]: boolean }>({});
+
+    useEffect(() => {
+        const fetchCars = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await axios.get('/api/admin/cars');
+                setCars(res.data);
+                // Set all cars as visible by default
+                const initialState: { [key: string]: boolean } = {};
+                (Array.isArray(res.data) ? res.data : []).forEach((car: any) => {
+                    initialState[car.id] = true;
+                });
+                setVisibleCars(initialState);
+            } catch (err: any) {
+                setError(err?.response?.data?.error || err.message || 'Gagal memuat data mobil');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCars();
+    }, []);
 
     const toggleCarVisibility = (carId: string) => {
         setVisibleCars(prev => ({
@@ -65,13 +81,11 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-gray-100">
             <AdminHeader />
-
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Dasbor</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
                     <p className="mt-1 text-gray-500">Selamat datang di dasbor admin 17RentCar.</p>
                 </div>
-
                 <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="mb-4">
                         <TabsTrigger value="overview">Ringkasan</TabsTrigger>
@@ -186,65 +200,70 @@ export default function AdminDashboard() {
                             </Button>
                         </div>
                         <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Nama</TableHead>
-                                        <TableHead>Tipe</TableHead>
-                                        <TableHead>Kapasitas</TableHead>
-                                        <TableHead className="hidden md:table-cell">Transmisi</TableHead>
-                                        <TableHead className="text-right">Harga/Hari</TableHead>
-                                        <TableHead>Tampilkan di Beranda</TableHead>
-                                        <TableHead className="w-[100px]">Aksi</TableHead>
-                                    </TableRow>
-                                </TableHeader>                                <TableBody>
-                                    {cars.slice(0, 5).map((car) => (
-                                        <TableRow key={car.id}>
-                                            <TableCell className="font-medium">{car.name}</TableCell>
-                                            <TableCell>{car.type}</TableCell>
-                                            <TableCell>{car.capacity} Orang</TableCell>
-                                            <TableCell className="hidden md:table-cell">{car.transmission}</TableCell>
-                                            <TableCell className="text-right">Rp {car.price.toLocaleString()}</TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center justify-center">
-                                                    <label className="relative inline-flex items-center cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="sr-only peer"
-                                                            checked={visibleCars[car.id] || false}
-                                                            onChange={() => toggleCarVisibility(car.id)}
-                                                        />
-                                                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                                                    </label>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/dashboard/cars/edit?id=${car.id}`)}>
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteCar(car.id)}>
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {cars.length === 0 && (
+                            {loading ? (
+                                <div className="text-center py-8 text-gray-500">Memuat data mobil...</div>
+                            ) : error ? (
+                                <div className="text-center py-8 text-red-500">{error}</div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
                                         <TableRow>
-                                            <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                                Tidak ada data mobil yang tersedia.
-                                            </TableCell>
+                                            <TableHead>Nama</TableHead>
+                                            <TableHead>Tipe</TableHead>
+                                            <TableHead>Kapasitas</TableHead>
+                                            <TableHead className="hidden md:table-cell">Transmisi</TableHead>
+                                            <TableHead className="text-right">Harga/Hari</TableHead>
+                                            <TableHead>Tampilkan di Beranda</TableHead>
+                                            <TableHead className="w-[100px]">Aksi</TableHead>
                                         </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>                        <div className="flex justify-center mt-4">
-                            <Button variant="outline" onClick={() => {
-                                // In a real app, this would navigate to a dedicated page showing all cars
-                                // For now we'll just alert since we're using mock data
-                                alert('Halaman ini akan menampilkan semua daftar mobil. Fitur ini masih dalam pengembangan.');
-                            }}>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {cars.slice(0, 5).map((car) => (
+                                            <TableRow key={car.id}>
+                                                <TableCell className="font-medium">{car.name}</TableCell>
+                                                <TableCell>{car.type}</TableCell>
+                                                <TableCell>{car.capacity} Orang</TableCell>
+                                                <TableCell className="hidden md:table-cell">{Array.isArray(car.transmission) ? (car.transmission.length === 2 ? "AT/MT" : car.transmission[0]) : typeof car.transmission === 'string' && car.transmission.startsWith('[') ? (JSON.parse(car.transmission).length === 2 ? "AT/MT" : JSON.parse(car.transmission)[0]) : car.transmission}</TableCell>
+                                                <TableCell className="text-right">Rp {car.price?.toLocaleString()}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center justify-center">
+                                                        <label className="relative inline-flex items-center cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="sr-only peer"
+                                                                checked={visibleCars[car.id] || false}
+                                                                onChange={() => setVisibleCars(prev => ({ ...prev, [car.id]: !prev[car.id] }))
+                                                                }
+                                                            />
+                                                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                                        </label>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/dashboard/cars/edit?id=${car.id}`)}>
+                                                            <Edit className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => alert('Fitur hapus mobil belum diimplementasikan di BFF ini!')}>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        {cars.length === 0 && !loading && (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                                    Tidak ada data mobil yang tersedia.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <Button variant="outline" onClick={() => alert('Halaman ini akan menampilkan semua daftar mobil. Fitur ini masih dalam pengembangan.')}>
                                 Lihat Semua Mobil ({cars.length})
                             </Button>
                         </div>

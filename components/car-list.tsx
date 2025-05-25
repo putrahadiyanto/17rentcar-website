@@ -82,7 +82,15 @@ export function CarList({ cars }: CarListProps) {
                     <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3">
                       <div className="flex flex-col items-center text-center p-1 sm:p-2 bg-gray-50 rounded-lg">
                         <Car className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 mb-1" />
-                        <span className="text-xs">{car.transmission}</span>
+                        <span className="text-xs">
+                          {Array.isArray(car.transmission)
+                            ? car.transmission.length === 2
+                              ? "AT/MT"
+                              : car.transmission[0]
+                            : typeof car.transmission === 'string' && car.transmission.startsWith('[')
+                              ? (JSON.parse(car.transmission).length === 2 ? "AT/MT" : JSON.parse(car.transmission)[0])
+                              : car.transmission}
+                        </span>
                       </div>
                       <div className="flex flex-col items-center text-center p-1 sm:p-2 bg-gray-50 rounded-lg">
                         <Users className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 mb-1" />

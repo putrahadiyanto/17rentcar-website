@@ -138,7 +138,7 @@ export default function CarDetailPage() {
               <h2 className="text-2xl font-bold text-red-600 mb-1">
                 Rp {car.price.toLocaleString("id-ID")} <span className="text-sm font-normal text-gray-600">/ hari</span>
               </h2>
-              <p className="text-gray-600">Harga sudah termasuk driver dan BBM (dalam kota)</p>
+              <p className="text-gray-600">Harga yang tertera adalah untuk sistem lepas kunci (tanpa BBM dan Supir)</p>
             </div>
 
             <div className="mb-8">              <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -205,7 +205,13 @@ export default function CarDetailPage() {
                     </div>
                     <div className="flex justify-between py-2 border-b">
                       <span className="text-gray-600">Transmisi</span>
-                      <span className="font-medium">{car.transmission}</span>
+                      <span className="font-medium">
+                        {Array.isArray(car.transmission)
+                          ? car.transmission.filter(Boolean).join(' atau ')
+                          : typeof car.transmission === 'string' && car.transmission.startsWith('[')
+                            ? JSON.parse(car.transmission).join(' dan ')
+                            : car.transmission}
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -216,10 +222,6 @@ export default function CarDetailPage() {
                     <div className="flex justify-between py-2 border-b">
                       <span className="text-gray-600">Bahan Bakar</span>
                       <span className="font-medium">{car.fuelType}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Warna</span>
-                      <span className="font-medium">{car.color}</span>
                     </div>
                     <div className="flex justify-between py-2 border-b">
                       <span className="text-gray-600">AC</span>
