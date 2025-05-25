@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 // This API route will fetch a single car by ID from your Laravel backend
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: { id: number } }
 ) {
     try {
-        const { id } = params;
+        // Await params for Next.js App Router compliance
+        const { id } = await context.params;
 
         // Get the Laravel API URL from environment variables or use the default
         // Make sure we're using the server-side env variable, not the NEXT_PUBLIC_ one

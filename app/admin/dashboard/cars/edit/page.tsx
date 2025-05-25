@@ -65,7 +65,7 @@ const TRANSMISSIONS = [
 
 // Form validation schema
 const carFormSchema = z.object({
-  id: z.string(),
+  id: z.coerce.number().int().positive(),
   name: z.string().min(2, { message: 'Nama harus minimal 2 karakter' }),
   brand: z.string().min(1, { message: 'Merek wajib diisi' }),
   type: z.string().min(1, { message: 'Tipe wajib diisi' }),
@@ -86,7 +86,8 @@ type FormValues = z.infer<typeof carFormSchema>;
 export default function EditCarPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const carId = searchParams?.get('id');
+  const carIdParam = searchParams?.get('id');
+  const carId = carIdParam ? parseInt(carIdParam, 10) : 0;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,11 +98,13 @@ export default function EditCarPage() {
   const [customFeatures, setCustomFeatures] = useState<string[]>([]);
 
   // Combine preset features with custom ones
-  const allFeatures = [...AVAILABLE_FEATURES, ...customFeatures.filter((f: string) => !AVAILABLE_FEATURES.includes(f))];  // Initialize the form
+  const allFeatures = [...AVAILABLE_FEATURES, ...customFeatures.filter((f: string) => !AVAILABLE_FEATURES.includes(f))];
+
+  // Initialize the form
   const form = useForm<FormValues>({
     resolver: zodResolver(carFormSchema),
     defaultValues: {
-      id: '',
+      id: 0,
       name: '',
       brand: '',
       type: '',

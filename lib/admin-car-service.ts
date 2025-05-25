@@ -26,14 +26,12 @@ export const AdminCarService = {
             handleApiError(error as AxiosError);
             return []; // Return empty array to avoid null checks
         }
-    },
-
-    /**
+    },    /**
      * Get a specific car by ID
      * @param id Car ID
      * @returns Promise with car data
      */
-    getCarById: async (id: string): Promise<CarType | null> => {
+    getCarById: async (id: number): Promise<CarType | null> => {
         try {
             console.log(`[AdminCarService] Getting car with ID: ${id}`);
             const response = await axios.get(`${ADMIN_CARS_API_URL}?id=${id}`);
@@ -65,10 +63,9 @@ export const AdminCarService = {
     /**
      * Update an existing car
      * @param id Car ID
-     * @param carData Updated car data
-     * @returns Promise with updated car data
+     * @param carData Updated car data     * @returns Promise with updated car data
      */
-    updateCar: async (id: string, carData: Partial<CarType>): Promise<CarType | null> => {
+    updateCar: async (id: number, carData: Partial<CarType>): Promise<CarType | null> => {
         try {
             console.log(`[AdminCarService] Updating car ${id}:`, carData);
             const response = await axios.put(`${ADMIN_CARS_API_URL}?id=${id}`, carData);
@@ -85,7 +82,7 @@ export const AdminCarService = {
      * @param id Car ID to delete
      * @returns Promise indicating success or failure
      */
-    deleteCar: async (id: string): Promise<boolean> => {
+    deleteCar: async (id: number): Promise<boolean> => {
         try {
             console.log(`[AdminCarService] Deleting car ${id}`);
             await axios.delete(`${ADMIN_CARS_API_URL}?id=${id}`);
@@ -102,7 +99,7 @@ export const AdminCarService = {
      * @param id Car ID
      * @param isVisible Visibility status
      * @returns Promise indicating success or failure
-     */    toggleCarVisibility: async (id: string, isVisible: boolean): Promise<boolean> => {
+     */    toggleCarVisibility: async (id: number, isVisible: boolean): Promise<boolean> => {
         try {
             console.log(`[AdminCarService] Setting car ${id} visibility to: ${isVisible}`);
             const response = await axios.patch(`${ADMIN_CARS_API_URL}?id=${id}`, {

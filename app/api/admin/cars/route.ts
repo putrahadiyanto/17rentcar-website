@@ -24,10 +24,10 @@ function getAuthHeaders(req: NextRequest) {
  * - GET /api/admin/cars/{car}
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Parse URL to extract car ID if present
+  try {    // Parse URL to extract car ID if present
     const { searchParams } = new URL(request.url);
-    const carId = searchParams.get('id');
+    const carIdParam = searchParams.get('id');
+    const carId = carIdParam ? parseInt(carIdParam, 10) : null;
     const url = carId ? `${API_BASE_URL}/${carId}` : API_BASE_URL;
 
     console.log(`[BFF] GET request to ${url}`);
@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const carId = searchParams.get('id');
+    const carIdParam = searchParams.get('id');
+    const carId = carIdParam ? parseInt(carIdParam, 10) : null;
 
     if (!carId) {
       return NextResponse.json({ error: 'Car ID required' }, { status: 400 });
@@ -100,7 +101,8 @@ export async function PUT(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const carId = searchParams.get('id');
+    const carIdParam = searchParams.get('id');
+    const carId = carIdParam ? parseInt(carIdParam, 10) : null;
 
     if (!carId) {
       return NextResponse.json({ error: 'Car ID required' }, { status: 400 });
@@ -129,7 +131,8 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const carId = searchParams.get('id');
+    const carIdParam = searchParams.get('id');
+    const carId = carIdParam ? parseInt(carIdParam, 10) : null;
 
     if (!carId) {
       return NextResponse.json({ error: 'Car ID required' }, { status: 400 });

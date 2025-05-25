@@ -24,9 +24,7 @@ import { useRouter } from "next/navigation";
 import { CarType } from '@/types/car';
 import AdminCarService from '@/lib/admin-car-service';
 
-export default function AdminDashboard() {
-    const router = useRouter();
-    const [cars, setCars] = useState<CarType[]>([]);
+export default function AdminDashboard() {    const router = useRouter(); const [cars, setCars] = useState<CarType[]>([]);
     const [visibleCars, setVisibleCars] = useState<{ [key: number]: boolean }>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -45,9 +43,7 @@ export default function AdminDashboard() {
 
                 // Ensure we have an array of cars
                 const carsArray = Array.isArray(data) ? data : [];
-                setCars(carsArray);
-
-                // Set all cars as visible by default
+                setCars(carsArray);                // Set all cars as visible by default
                 const initialState: { [key: number]: boolean } = {};
                 carsArray.forEach((car: CarType) => {
                     initialState[car.id] = car.isShowing === true; // Use isShowing from backend
@@ -61,10 +57,7 @@ export default function AdminDashboard() {
             }
         };
 
-        fetchCars();
-    }, []);
-
-    const toggleCarVisibility = async (carId: number) => {
+        fetchCars();    }, []); const toggleCarVisibility = async (carId: number) => {
         // Optimistically update the UI
         const newVisibility = !visibleCars[carId];
         setVisibleCars(prev => ({
@@ -80,16 +73,13 @@ export default function AdminDashboard() {
             const status = newVisibility ? 'ditampilkan' : 'disembunyikan';
             alert(`Mobil akan ${status} di beranda`);
         } catch (err) {
-            // Revert on failure
-            setVisibleCars(prev => ({
+            // Revert on failure            setVisibleCars(prev => ({
                 ...prev,
                 [carId]: !newVisibility
             }));
             alert('Gagal mengubah visibilitas mobil. Silakan coba lagi.');
         }
-    };
-
-    const handleDeleteCar = async (carId: number) => {
+    }; const handleDeleteCar = async (carId: number) => {
         if (confirm('Yakin ingin menghapus mobil ini? Tindakan ini tidak dapat dibatalkan.')) {
             try {
                 // Find the car to get its image path
@@ -138,7 +128,9 @@ export default function AdminDashboard() {
         }
 
         setSortConfig({ key, direction });
-    };    // Function to apply sorting to the car data
+    };
+
+    // Function to apply sorting to the car data
     const getSortedCars = () => {
         if (!sortConfig.key || sortConfig.direction === null) return cars;
 
@@ -148,30 +140,6 @@ export default function AdminDashboard() {
                 // Numeric sorting
                 const aValue = a[sortConfig.key as keyof CarType] as number;
                 const bValue = b[sortConfig.key as keyof CarType] as number;
-
-                if (sortConfig.direction === 'ascending') {
-                    return aValue - bValue;
-                } else {
-                    return bValue - aValue;
-                }
-            } else if (sortConfig.key === 'transmission') {
-                // Handle transmission array
-                const aValue = Array.isArray(a.transmission)
-                    ? a.transmission.join(", ").toLowerCase()
-                    : String(a.transmission).toLowerCase();
-                const bValue = Array.isArray(b.transmission)
-                    ? b.transmission.join(", ").toLowerCase()
-                    : String(b.transmission).toLowerCase();
-
-                if (sortConfig.direction === 'ascending') {
-                    return aValue.localeCompare(bValue);
-                } else {
-                    return bValue.localeCompare(aValue);
-                }
-            } else if (sortConfig.key === 'isShowing') {
-                // Boolean sorting
-                const aValue = a.isShowing ? 1 : 0;
-                const bValue = b.isShowing ? 1 : 0;
 
                 if (sortConfig.direction === 'ascending') {
                     return aValue - bValue;
@@ -190,9 +158,7 @@ export default function AdminDashboard() {
                 }
             }
         });
-    };
-
-    // Authentication is now handled by the AuthProvider in layout.tsx
+    };// Authentication is now handled by the AuthProvider in layout.tsx
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -217,8 +183,7 @@ export default function AdminDashboard() {
                                     <div>
                                         <CardTitle className="text-sm font-medium">Sewa Mobil</CardTitle>
                                         <CardDescription>Total mobil tersedia</CardDescription>
-                                    </div>
-                                    <Car className="h-5 w-5 text-blue-600" />
+                                    </div>                                    <Car className="h-5 w-5 text-blue-600" />
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{cars.length}</div>
@@ -308,6 +273,7 @@ export default function AdminDashboard() {
                                     </Table>
                                 </CardContent>
                             </Card>
+
                         </div>
                     </TabsContent>
                     <TabsContent value="cars">
@@ -316,114 +282,81 @@ export default function AdminDashboard() {
                             <Button size="sm" className="flex items-center gap-1" onClick={() => router.push("/admin/dashboard/cars/add")}>
                                 <Plus className="h-4 w-4" /> Tambah Mobil Baru
                             </Button>
-                        </div>
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead
-                                            className="cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('name')}
-                                        >
-                                            <div className="flex items-center">
-                                                Nama
-                                                {sortConfig.key === 'name' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('year')}
-                                        >
-                                            <div className="flex items-center">
-                                                Tahun
-                                                {sortConfig.key === 'year' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('type')}
-                                        >
-                                            <div className="flex items-center">
-                                                Tipe
-                                                {sortConfig.key === 'type' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}
-                                            </div>                                        </TableHead>
-                                        <TableHead
-                                            className="hidden md:table-cell cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('transmission')}
-                                        >
-                                            <div className="flex items-center">
-                                                Transmisi
-                                                {sortConfig.key === 'transmission' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-right cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('price')}
-                                        >
-                                            <div className="flex items-center justify-end">
-                                                Harga/Hari
-                                                {sortConfig.key === 'price' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="cursor-pointer hover:bg-gray-50"
-                                            onClick={() => requestSort('isShowing')}
-                                        >
-                                            <div className="flex items-center">
-                                                Tampilkan di Beranda
-                                                {sortConfig.key === 'isShowing' ? (
-                                                    sortConfig.direction === 'ascending' ? (
-                                                        <ArrowUp className="ml-2 h-4 w-4" />
-                                                    ) : sortConfig.direction === 'descending' ? (
-                                                        <ArrowDown className="ml-2 h-4 w-4" />
-                                                    ) : null
-                                                ) : (
-                                                    <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                                )}
-                                            </div>
-                                        </TableHead>
-                                        <TableHead className="w-[100px]">Aksi</TableHead>
-                                    </TableRow>
-                                </TableHeader>
+                        </div>                        <div className="rounded-md border">
+                            <Table>                                <TableHeader>
+                                <TableRow>                                        <TableHead
+                                    className="cursor-pointer hover:bg-gray-50"
+                                    onClick={() => requestSort('name')}
+                                >
+                                    <div className="flex items-center">
+                                        Nama
+                                        {sortConfig.key === 'name' ? (
+                                            sortConfig.direction === 'ascending' ? (
+                                                <ArrowUp className="ml-2 h-4 w-4" />
+                                            ) : sortConfig.direction === 'descending' ? (
+                                                <ArrowDown className="ml-2 h-4 w-4" />
+                                            ) : null
+                                        ) : (
+                                            <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                        )}
+                                    </div>
+                                </TableHead>
+                                    <TableHead
+                                        className="cursor-pointer hover:bg-gray-50"
+                                        onClick={() => requestSort('year')}
+                                    >
+                                        <div className="flex items-center">
+                                            Tahun
+                                            {sortConfig.key === 'year' ? (
+                                                sortConfig.direction === 'ascending' ? (
+                                                    <ArrowUp className="ml-2 h-4 w-4" />
+                                                ) : sortConfig.direction === 'descending' ? (
+                                                    <ArrowDown className="ml-2 h-4 w-4" />
+                                                ) : null
+                                            ) : (
+                                                <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                            )}
+                                        </div>
+                                    </TableHead>
+                                    <TableHead
+                                        className="cursor-pointer hover:bg-gray-50"
+                                        onClick={() => requestSort('type')}
+                                    >
+                                        <div className="flex items-center">
+                                            Tipe
+                                            {sortConfig.key === 'type' ? (
+                                                sortConfig.direction === 'ascending' ? (
+                                                    <ArrowUp className="ml-2 h-4 w-4" />
+                                                ) : sortConfig.direction === 'descending' ? (
+                                                    <ArrowDown className="ml-2 h-4 w-4" />
+                                                ) : null
+                                            ) : (
+                                                <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                            )}
+                                        </div>
+                                    </TableHead>
+                                    <TableHead className="hidden md:table-cell">Transmisi</TableHead>
+                                    <TableHead
+                                        className="text-right cursor-pointer hover:bg-gray-50"
+                                        onClick={() => requestSort('price')}
+                                    >
+                                        <div className="flex items-center justify-end">
+                                            Harga/Hari
+                                            {sortConfig.key === 'price' ? (
+                                                sortConfig.direction === 'ascending' ? (
+                                                    <ArrowUp className="ml-2 h-4 w-4" />
+                                                ) : sortConfig.direction === 'descending' ? (
+                                                    <ArrowDown className="ml-2 h-4 w-4" />
+                                                ) : null
+                                            ) : (
+                                                <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                            )}
+                                        </div>
+                                    </TableHead>
+                                    <TableHead>Tampilkan di Beranda</TableHead>
+                                    <TableHead className="w-[100px]">Aksi</TableHead>
+                                </TableRow>
+                            </TableHeader>
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
@@ -442,52 +375,51 @@ export default function AdminDashboard() {
                                                     <span className="ml-2 text-red-500">Error: {error}</span>
                                                 </div>
                                             </TableCell>
-                                        </TableRow>
-                                    ) : Array.isArray(cars) && cars.length > 0 ? (
-                                        getSortedCars().map((car) => (
-                                            <TableRow key={car.id}>
-                                                <TableCell className="font-medium">{car.name}</TableCell>
-                                                <TableCell>{car.year}</TableCell>
-                                                <TableCell>{car.type}</TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    {Array.isArray(car.transmission)
-                                                        ? car.transmission.join(", ")
-                                                        : car.transmission}
-                                                </TableCell>
-                                                <TableCell className="text-right">Rp {car.price.toLocaleString()}</TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center justify-center">
-                                                        <label className="relative inline-flex items-center cursor-pointer">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="sr-only peer"
-                                                                checked={
-                                                                    car.isShowing || false
-                                                                }
-                                                                onChange={async () => {
-                                                                    await toggleCarVisibility(car.id);
-                                                                    setCars(prevCars => prevCars.map(c =>
-                                                                        c.id === car.id ? { ...c, isShowing: !c.isShowing } : c
-                                                                    ));
-                                                                }}
-                                                            />
-                                                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                                                        </label>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/dashboard/cars/edit?id=${car.id}`)}>
-                                                            <Edit className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteCar(car.id)}>
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
+                                        </TableRow>) : Array.isArray(cars) && cars.length > 0 ? (
+                                            getSortedCars().map((car) => (
+                                                <TableRow key={car.id}>
+                                                    <TableCell className="font-medium">{car.name}</TableCell>
+                                                    <TableCell>{car.year}</TableCell>
+                                                    <TableCell>{car.type}</TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        {Array.isArray(car.transmission)
+                                                            ? car.transmission.join(", ")
+                                                            : car.transmission}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">Rp {car.price.toLocaleString()}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center justify-center">
+                                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="sr-only peer"
+                                                                    checked={
+                                                                        car.isShowing || false
+                                                                    }
+                                                                    onChange={async () => {
+                                                                        await toggleCarVisibility(car.id);
+                                                                        setCars(prevCars => prevCars.map(c =>
+                                                                            c.id === car.id ? { ...c, isShowing: !c.isShowing } : c
+                                                                        ));
+                                                                    }}
+                                                                />
+                                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                                            </label>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/dashboard/cars/edit?id=${car.id}`)}>
+                                                                <Edit className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button variant="outline" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteCar(car.id)}>
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
                                         <TableRow>
                                             <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                                 Tidak ada data mobil yang tersedia.
@@ -496,8 +428,7 @@ export default function AdminDashboard() {
                                     )}
                                 </TableBody>
                             </Table>
-                        </div>
-                        <div className="flex justify-center mt-4">
+                        </div>                        <div className="flex justify-center mt-4">
                             <Button variant="outline" onClick={() => {
                                 router.push('/admin/cars');
                             }}>

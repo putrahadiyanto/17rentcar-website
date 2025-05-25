@@ -38,7 +38,7 @@ export async function fetchCars(): Promise<CarType[]> {
 /**
  * Fetch a single car by ID from Laravel API
  */
-export async function fetchCarById(id: string): Promise<CarType | null> {
+export async function fetchCarById(id: number | string): Promise<CarType | null> {
     try {
         // Using our Next.js API route instead of direct Laravel API
         const response = await fetch(`/api/cars/${id}`, {
